@@ -1,4 +1,4 @@
 TinyNet
 =======
 
-TinyNet a tiny  n-blocking  c++ network library for single threaded server
+TinyNet a tiny  n-blocking  c++ network library for single thread server

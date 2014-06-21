@@ -14,6 +14,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "-O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
 aux_source_directory(./ SRC_LIST)
+include_directories( ./ )
+
 MESSAGE(STATUS "This is SOURCE dir "${TinyNet_SOURCE_DIR})
 
 ADD_DEFINITIONS(-DDEBUG)

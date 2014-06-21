@@ -24,6 +24,11 @@ int SocketHelper::bind( int fd, sockaddr_in* addr );
 
 int SocketHelper::listen( int fd )
 {
+    //Fixme: backlog sure?
+    int r  = ::listen( fd, 50 );
+    if( r < 0 ) LOG_ERROR( "listen  fail ");
+
+    return r;
 
 }
 
@@ -31,7 +36,14 @@ int SocketHelper::listen( int fd )
 int SocketHelper::accept( int fd,  sockaddr_in* addr )
 {
 
+    int addrlen = ( socklen_t ) ( sizeof( addr ) );
+    int  connfd =  ::accept4( sockfd, (sockaddr*)(addr),
+                                      &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC)
 
+    if ( connfd < 0 )
+    {
+
+    }
 }
 
 int SocketHelper::connect( int fd, socketaddr_in* addr )

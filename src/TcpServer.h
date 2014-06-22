@@ -16,13 +16,16 @@ public:
 
 public:
 
-    int bindAndListen( );
+    int     bindAndListen( );
+
+    void    run();
 
 private:
-    int     port_;
-    struct  sockaddr_in  addr_;
-    int     listenfd_;
-
+    int                     port_;
+    struct  sockaddr_in     addr_;
+    int                     listenfd_;
+    SocketHelper            socketHelper_;
+    bool                    isListening_;
 };
 
 #endif // _TCP_SERVER_H_

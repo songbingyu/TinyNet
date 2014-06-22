@@ -6,7 +6,8 @@
 
 #include< EventEpoll.h >
 
-EventEpoll::EventEpoll()
+EventEpoll::EventEpoll( ): epollfd_(-1 ),
+                            events_(100)
 {
 
 }
@@ -15,6 +16,37 @@ EventEpoll::~EventEpoll()
 {
 
 }
+
+int EventEpoll::epollCreate( )
+{
+
+    epollfd_ = epoll_create1( EPOLL_CLOEXEC );
+    if( epollfd_ < 0 )
+    {
+        LOG_ERROR( " epoll create fail ... " );
+        return -1;
+    }
+
+    return 0;
+}
+
+
+int EventEpoll::addEvent( )
+{
+
+}
+
+int EventEpoll::delEvent()
+{
+
+
+}
+
+int EventEpoll::waitEvent()
+{
+
+}
+
 
 
 

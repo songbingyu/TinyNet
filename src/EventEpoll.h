@@ -6,15 +6,34 @@
 #ifndef     _EVENTEPOLL_H_
 #define     _EVENTEPOLL_H_
 
+
+#include<vector>
+struct      epoll_event;
+
+
 // epoll wraper
 class  EventEpoll
 {
  public :
     EventEpoll();
     ~EventEpoll();
+ public:
 
-private:
+    int epollCreate();
 
+    int addEvent();
+
+    int delEvent();
+
+    int waitEvent();
+
+ public:
+    typedef  std::vector< struct epoll_event >  EventVec;
+
+    EventVec    events_;
+ private:
+
+    int epollfd_;
 
 };
 

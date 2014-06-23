@@ -13,6 +13,7 @@
 
 #include "Log.h"
 #include "TcpAcceptor.h"
+#include "Connection.h"
 #include "EventLoop.h"
 #include "TcpServer.h"
 
@@ -83,30 +84,45 @@ void TcpServer::run( )
 
 void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 {
+#ifdef  _DEBUG_
+    assert( NULL == fd );
+    assert( NULL == addr );
+#endif
+
+    Connection* conn  = new Connection( *fd, loop_ ,*addr );
+
+    conn->setReadCallBack( new ReadCallBack( this, &TcpServer::onRead ) );
+    conn->setWriteCallBack( new WriteCallBack( this, &TcpServer::onWrite ));
+    conn->setCloseCallBack( new CloseCallBack( this, &TcpServer::onClose ) );
+    connectionList_.push_back( conn );
+
+    onConnection( conn );
+
     return ;
 }
 
 int TcpServer::onConnection( Connection* conn )
 {
+    LOG_INFO(" receive new connection ");
     return 1;
 }
 
 
-int TcpServer::onRead( Connection* conn )
+void TcpServer::onRead( Connection* conn, int* arg  )
 {
-    return 1;
+    return ;
 }
 
-int TcpServer::onWrite( Connection* conn )
+void TcpServer::onWrite( Connection* conn, int* arg )
 {
-    return 1;
+    return ;
 
 }
 
-int TcpServer::onClose( Connection* conn )
+void TcpServer::onClose( Connection* conn, int* arg )
 {
 
-    return 1;
+    return ;
 }
 
 

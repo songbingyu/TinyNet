@@ -6,11 +6,13 @@
 #ifndef  _TCP_SERVER_H_
 #define  _TCP_SERVER_H_
 
-class Connection;
 
+#include<list>
+
+class  IConnection;
+class  Connection;
 class  TcpAcceptor;
 class  EventLoop;
-
 
 class  TcpServer
 {
@@ -25,13 +27,15 @@ private:
 public:
     void    onNewConnection( int*  fd, struct sockaddr_in*  addr  );
     int     onConnection( Connection* conn );
-    int     onRead ( Connection* conn );
-    int     onWrite( Connection* conn );
-    int     onClose( Connection* conn );
+    void    onRead ( Connection* conn, int*  arg= NULL );
+    void    onWrite( Connection* conn, int*  arg= NULL );
+    void    onClose( Connection* conn, int*  arg= NULL );
 private:
     int                     port_;
     TcpAcceptor*            acceptor_;
     EventLoop*              loop_;
+    typedef   std::list<IConnection*> ConnectionList;
+    ConnectionList          connectionList_;
 };
 
 #endif // _TCP_SERVER_H_

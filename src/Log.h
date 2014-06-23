@@ -20,10 +20,10 @@ class Log
 public:
     enum LogLevel
     {
-        INFO,
-        DEBUG,
-        WARN,
-        ERROR,
+        LOG_INFO,
+        LOG_DEBUG,
+        LOG_WARN,
+        LOG_ERROR,
     };
 
     enum
@@ -53,10 +53,10 @@ public :
 
 };
 
-#define     LOG_INFO(  fmt, args... )    Log::WriteLog( "INFO",   __FILE__, __LINE__, __DATE__, __TIME__, fmt, args  )
-#define     LOG_DEBUG( fmt, args... )    Log::WriteLog( "DEBUG",  __FILE__, __LINE__, __DATE__, __TIME__, fmt, args  )
-#define     LOG_WARN(  fmt, args... )    Log::WriteLog( "WARN",   __FILE__, __LINE__, __DATE__, __TIME__, fmt, args  )
-#define     LOG_ERROR( fmt, args... )    Log::WriteLog( "ERROR",  __FILE__, __LINE__, __DATE__, __TIME__, fmt, args  )
+#define     LOG_INFO(  fmt, ... )    Log::WriteLog( "INFO",   __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
+#define     LOG_DEBUG( fmt, ... )    Log::WriteLog( "DEBUG",  __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
+#define     LOG_WARN(  fmt, ... )    Log::WriteLog( "WARN",   __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
+#define     LOG_ERROR( fmt, ... )    Log::WriteLog( "ERROR",  __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
 
 
 

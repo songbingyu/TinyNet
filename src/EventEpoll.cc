@@ -4,6 +4,7 @@
  */
 
 #include <sys/epoll.h>
+#include"Log.h"
 #include "EventEpoll.h"
 
 
@@ -35,24 +36,27 @@ int EventEpoll::epollCreate( )
 
 int EventEpoll::addEvent( )
 {
-
+    return 1;
 }
 
 int EventEpoll::delEvent()
 {
 
+    return 1;
 
 }
 
 int EventEpoll::modEvent()
 {
 
+    return 1;
 }
 
 
 int EventEpoll::waitEvent()
 {
 
+    return 1;
 }
 
 

@@ -15,10 +15,11 @@ class  EventLoop
 public :
      EventLoop();
      ~EventLoop();
+
 public:
      int run();
-private:
 
+private:
      EventEpoll eventEpoll_;
 };
 

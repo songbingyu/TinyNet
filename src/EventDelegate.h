@@ -6,25 +6,36 @@
 #ifndef _EVENTDELEGATE_H_
 #define _EVENTDELEGATE_H_
 
-template < typename  C, typename T  >
+
+struct sockaddr_in;
+
+template < typename  C, typename A1, typename A2  >
 class  EventDelegate
 {
 public:
-    typedef   void  ( C::* Func  )( T*  arg );
+    typedef   void  ( C::* Func  )( A1*  arg1, A2* arg2 );
 
-    EventDelegate( T* inst, Func fun ): inst_( inst ), func_( func )
+    EventDelegate( C* inst, Func func ): inst_( inst ), func_( func )
     {
 
     }
 
-    void operator()( T* arg )
+    void callback( A1* arg1, A2* arg2 = NULL   )
     {
-        ( inst->*func )( arg );
+
+        ( inst_->*func_ )( arg1, arg2 );
+
     }
+
+    /*void callback( T* arg, struct sockaddr_in & addr )
+    {
+        (inst_->*func_ )( arg, addr );
+    }*/
+
 private:
-    T*      inst_;
+    C*      inst_;
     Func    func_;
-}
+};
 
 
 

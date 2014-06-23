@@ -6,6 +6,16 @@
 #ifndef _CONNECTION_H_
 #define _CONNECTION_H_
 
+#include"TcpServer.h"
+#include"EventDelegate.h"
+
+class Connection;
+
+
+//typedef  EventDelegate<TcpServer, Connection>     NewConnectionCallBack;
+typedef  EventDelegate<TcpServer, Connection>     ReadCallBack;
+typedef  EventDelegate<TcpServer, Connection>     WriteCallBack;
+typedef  EventDelegate<TcpServer, Connection>     CloseCallBack;
 
 class EventLoop;
 
@@ -19,7 +29,15 @@ public:
     int  onRead( );
     int  onWrite( );
     int  onClose( );
+
+public:
+
 private:
+    //NewConnectionCallBack
+    ReadCallBack    readCallback _;
+    WriteCallBack   writeCallback_;
+    CloseCallback   closeCallBack_;
+
     int         sockfd_;
     EventLoop*  loop_;
 };

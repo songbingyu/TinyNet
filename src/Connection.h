@@ -6,40 +6,36 @@
 #ifndef _CONNECTION_H_
 #define _CONNECTION_H_
 
+#include"IConnection.h"
 #include"TcpServer.h"
 #include"EventDelegate.h"
 
-class Connection;
-
-
-//typedef  EventDelegate<TcpServer, Connection>     NewConnectionCallBack;
-typedef  EventDelegate<TcpServer, Connection>     ReadCallBack;
-typedef  EventDelegate<TcpServer, Connection>     WriteCallBack;
-typedef  EventDelegate<TcpServer, Connection>     CloseCallBack;
 
 class EventLoop;
 
 
-class Connection
+class Connection : public IConnection
 {
 public:
-    Connection( int fd,  EventLoop* loop );
+    Connection( int fd,  EventLoop* loop, struct sockaddr_in& addr  );
     ~Connection();
 public:
-    int  onRead( );
-    int  onWrite( );
-    int  onClose( );
+    virtual int  onRead( );
+    virtual int  onWrite( );
+    virtual int  onClose( );
 
 public:
 
 private:
-    //NewConnectionCallBack
-    ReadCallBack    readCallback _;
-    WriteCallBack   writeCallback_;
-    CloseCallback   closeCallBack_;
 
-    int         sockfd_;
-    EventLoop*  loop_;
+    typedef  EventDelegate<TcpServer, Connection, int >     ReadCallBack;
+    typedef  EventDelegate<TcpServer, Connection, int >     WriteCallBack;
+    typedef  EventDelegate<TcpServer, Connection, int >     CloseCallBack;
+    //NewConnectionCallBack
+    ReadCallBack*    readCallback_;
+    WriteCallBack*   writeCallback_;
+    CloseCallBack*   closeCallBack_;
+
 };
 
 #endif // _CONNECTION_H_

@@ -15,7 +15,7 @@ private:
 
 };
 
-#define     _TCP_SERVER_H_
+#endif  //     _TCP_SERVER_H_
 
 
 

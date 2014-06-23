@@ -8,9 +8,9 @@
 
 class Connection;
 
-#include <SocketHelper.h>
+class  TcpAcceptor;
+class  EventLoop;
 
-struct sockaddr_in;
 
 class  TcpServer
 {
@@ -21,19 +21,17 @@ public:
 public:
     void    run();
 private:
-    int     bindAndListen( );
-    int     onNewConnection( );
+    int     init();
 public:
+    int     onNewConnection( int fd, struct sockaddr_in& addr  );
     int     onConnection( Connection* conn );
     int     onRead ( Connection* conn );
     int     onWrite( Connection* conn );
     int     onClose( Connection* conn );
 private:
     int                     port_;
-    struct  sockaddr_in     addr_;
-    int                     listenfd_;
-    SocketHelper            socketHelper_;
-    bool                    isListening_;
+    TcpAcceptor*            acceptor_;
+    EventLoop*              loop_;
 };
 
 #endif // _TCP_SERVER_H_

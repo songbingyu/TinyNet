@@ -12,93 +12,99 @@
 #include <stdlib.h>
 
 #include "Log.h"
+#include "TcpAcceptor.h"
+#include "EventLoop.h"
 #include "TcpServer.h"
 
 TcpServer::TcpServer( int port ): port_( port )
 {
-
-    bindAndListen();
-
+    init();
 }
 
 
 TcpServer::~TcpServer()
 {
-    port_ = 0;
-    bzero( &addr_, sizeof(addr_) );
-    socketHelper_.close( listenfd_  );
-    listenfd_ = -1;
-    isListening_ = false;
+    port_ = -1;
+
+    delete  acceptor_;
+    acceptor_  = NULL;
+    delete  loop_;
+    loop_ = NULL;
+
 }
 
 
-int TcpServer::bindAndListen( )
+int TcpServer::init( )
 {
+
+    loop_ = new EventLoop();
+    assert( loop_ != NULL );
     assert( port_  >= 1024 );
 
-    bzero( &addr_, sizeof(addr_) );
-    addr_.sin_family = AF_INET;
-    addr_.sin_addr.s_addr = htonl( INADDR_ANY );
-    addr_.sin_port = htons( port_ );
+    struct sockaddr_in addr;
+    bzero( &addr, sizeof(addr) );
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl( INADDR_ANY );
+    addr.sin_port = htons( port_ );
 
     //Fixme: should beautiful exit ?
-    listenfd_ = socketHelper_.createNonBlockingSocket( );
-    if ( listenfd_ < 0  )
+    int listenfd  = SocketHelper::createNonBlockingSocket( );
+    if ( listenfd < 0  )
     {
         exit(1);
     }
 
-    if ( socketHelper_.bind( listenfd_,  &addr_ )  < 0 )
+    acceptor_ = new TcpAcceptor( listenfd, loop_ , addr );
+
+    if ( NULL == acceptor_  )
     {
         exit(1);
     }
 
-    if( socketHelper_.listen( listenfd_ ) < 0 )
-    {
-        exit(1);
-    }
+    return 1;
 
-    isListening_ = true;
 }
 
 void TcpServer::run( )
 {
-     if( !isListening_ )
+     if( !acceptor_->isListen() )
      {
        //LOG_ERROR("not listen ");
        return;
      }
 
+    loop_-> run();
 
-
+    return;
 
 }
 
-int TcpServer::onNewConnection()
+int TcpServer::onNewConnection( int fd, struct sockaddr_in& addr )
 {
-
+    return 1;
 }
 
 int TcpServer::onConnection( Connection* conn )
 {
-
+    return 1;
 }
 
 
 int TcpServer::onRead( Connection* conn )
 {
-
+    return 1;
 }
 
 int TcpServer::onWrite( Connection* conn )
 {
-
+    return 1;
 
 }
 
 int TcpServer::onClose( Connection* conn )
 {
 
+    return 1;
 }
 
 

@@ -6,9 +6,10 @@
 #ifndef   _EVENTLOOP_H_
 #define   _EVENTLOOP_H_
 
-
+#include<vector>
 #include "EventEpoll.h"
 
+class IConnections;
 
 class  EventLoop
 {
@@ -17,10 +18,15 @@ public :
      ~EventLoop();
 
 public:
+
+public:
      int run();
 
 private:
      EventEpoll eventEpoll_;
+     typedef std::vector<IConnections*>    ConnectionVec;
+
+     ConnectionVec      activeConnections_;
 };
 
 

@@ -8,8 +8,7 @@
 
 EventLoop::EventLoop()
 {
-
-
+    eventEpoll_.epollCreate();
 }
 
 EventLoop::~EventLoop()

@@ -5,8 +5,12 @@
 
 #ifndef  _TCP_SERVER_H_
 #define  _TCP_SERVER_H_
-#include <sys/socket.h>
+
+class Connection;
+
 #include <SocketHelper.h>
+
+struct sockaddr_in;
 
 class  TcpServer
 {
@@ -15,11 +19,15 @@ public:
      ~TcpServer( );
 
 public:
-
-    int     bindAndListen( );
-
     void    run();
-
+private:
+    int     bindAndListen( );
+    int     onNewConnection( );
+public:
+    int     onConnection( Connection* conn );
+    int     onRead ( Connection* conn );
+    int     onWrite( Connection* conn );
+    int     onClose( Connection* conn );
 private:
     int                     port_;
     struct  sockaddr_in     addr_;

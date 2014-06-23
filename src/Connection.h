@@ -17,6 +17,16 @@ typedef  EventDelegate<TcpServer, Connection, int >     ReadCallBack;
 typedef  EventDelegate<TcpServer, Connection, int >     WriteCallBack;
 typedef  EventDelegate<TcpServer, Connection, int >     CloseCallBack;
 
+enum ConnectionState
+{
+    CS_No,
+    //CS_Connecing,
+    CS_Connected,
+    //CS_DisConnecting,
+    CS_DisConnected,
+};
+
+
 class Connection : public IConnection
 {
 public:
@@ -27,12 +37,13 @@ public:
     virtual int  onWrite( );
     virtual int  onClose( );
 
+    int          onConnFinish( );
 public:
     void         setReadCallBack ( ReadCallBack*  cb ) { readCallback_  = cb; }
     void         setWriteCallBack( WriteCallBack* cb ) { writeCallback_ = cb; }
     void         setCloseCallBack( CloseCallBack* cb ) { closeCallBack_ = cb; }
 private:
-
+    ConnectionState  state_;
     //NewConnectionCallBack
     ReadCallBack*    readCallback_;
     WriteCallBack*   writeCallback_;

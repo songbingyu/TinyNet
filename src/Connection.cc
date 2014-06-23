@@ -10,7 +10,8 @@
 #include"Connection.h"
 
 
-Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IConnection( fd, loop, addr )
+Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IConnection( fd, loop, addr ),
+                                                                             state_( CS_No )
 {
 
 }
@@ -51,5 +52,10 @@ int  Connection::onClose( )
     return 1;
 }
 
-
+int  Connection::onConnFinish()
+{
+    state_ = CS_Connected;
+    enableRead();
+    return 1;
+}
 

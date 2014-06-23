@@ -5,10 +5,11 @@
 #ifndef _ICONNECTION_H_
 #define _ICONNECTION_H_
 
-#include"SocketHelper.h"
+#include <netinet/in.h>
+#include <sys/epoll.h>
+#include "EventLoop.h"
+#include "SocketHelper.h"
 
-
-class   EventLoop;
 
 class IConnection
 {
@@ -40,13 +41,23 @@ public:
     virtual int  onClose( ){  return 1; }
 
 public:
-    int     getSockFd( ) const { return sockfd_ ; }
+    int     getSockFd( ) const      { return sockfd_ ;    }
+    void    setEvents( int ev )     { events_ = ev;       }
+    int     getEvents( ) const      { return events_;     }
+    void    setReadEvents( int ev ) { readEvents_ = ev;   }
+    int     getReadEvents() const   { return readEvents_; }
+    void    enableRead( )           { events_ |= ( EPOLLIN | EPOLLPRI ); }
+    void    enableWrite( )          { events_ |=  EPOLLOUT; update();    }
+    void    update( )               { loop_->update( this );             }
 protected:
     int                 sockfd_;
     EventLoop*          loop_;
     struct sockaddr_in  localAddr_;
     SocketHelper*       socketHelper_;
-    struct sockaddr_in  peerAddr_;
+    //struct sockaddr_in  peerAddr_;
+    int                 events_;
+    int                 readEvents_;
+
 };
 
 #endif // _ICONNECTION_H_

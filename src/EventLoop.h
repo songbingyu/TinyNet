@@ -11,6 +11,8 @@
 
 class IConnections;
 
+typedef std::vector<IConnection*>  ConnectionVec;
+
 class  EventLoop
 {
 public :
@@ -18,14 +20,12 @@ public :
      ~EventLoop();
 
 public:
-
+    void update( IConnection* conn ) {  eventEpoll_.addEvent( conn ); }
 public:
      int run();
 
 private:
-     EventEpoll eventEpoll_;
-     typedef std::vector<IConnections*>    ConnectionVec;
-
+     EventEpoll         eventEpoll_;
      ConnectionVec      activeConnections_;
 };
 

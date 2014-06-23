@@ -13,6 +13,9 @@
 
 class EventLoop;
 
+typedef  EventDelegate<TcpServer, Connection, int >     ReadCallBack;
+typedef  EventDelegate<TcpServer, Connection, int >     WriteCallBack;
+typedef  EventDelegate<TcpServer, Connection, int >     CloseCallBack;
 
 class Connection : public IConnection
 {
@@ -25,12 +28,11 @@ public:
     virtual int  onClose( );
 
 public:
-
+    void         setReadCallBack ( ReadCallBack*  cb ) { readCallback_  = cb; }
+    void         setWriteCallBack( WriteCallBack* cb ) { writeCallback_ = cb; }
+    void         setCloseCallBack( CloseCallBack* cb ) { closeCallBack_ = cb; }
 private:
 
-    typedef  EventDelegate<TcpServer, Connection, int >     ReadCallBack;
-    typedef  EventDelegate<TcpServer, Connection, int >     WriteCallBack;
-    typedef  EventDelegate<TcpServer, Connection, int >     CloseCallBack;
     //NewConnectionCallBack
     ReadCallBack*    readCallback_;
     WriteCallBack*   writeCallback_;

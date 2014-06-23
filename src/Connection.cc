@@ -17,13 +17,26 @@ Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IC
 
 Connection::~Connection()
 {
-    sockfd_  = -1;
-    loop_ = NULL ;
+
+    delete readCallback_;
+    readCallback_  = NULL;
+
+    delete  writeCallback_;
+    writeCallback_ = NULL;
+
+    delete  closeCallBack_;
+    closeCallBack_ = NULL;
+
 }
 
 
 int  Connection::onRead( )
 {
+
+    if( readCallback_ )
+    {
+        readCallback_->callback( this );
+    }
     return 1;
 }
 

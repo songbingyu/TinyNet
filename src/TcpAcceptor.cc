@@ -24,6 +24,8 @@ TcpAcceptor::TcpAcceptor( int fd, EventLoop* loop, struct sockaddr_in&  addr ): 
 TcpAcceptor::~TcpAcceptor()
 {
 
+    delete  newConnCallBack_;
+    newConnCallBack_ = NULL;
 
 }
 

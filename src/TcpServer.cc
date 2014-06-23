@@ -61,6 +61,8 @@ int TcpServer::init( )
         exit(1);
     }
 
+    acceptor_->setNewConnectionCallBack( new NewConnectionCallBack( this, &TcpServer::onNewConnection ));
+
     return 1;
 
 }
@@ -79,9 +81,9 @@ void TcpServer::run( )
 
 }
 
-int TcpServer::onNewConnection( int fd, struct sockaddr_in& addr )
+void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 {
-    return 1;
+    return ;
 }
 
 int TcpServer::onConnection( Connection* conn )

@@ -23,7 +23,7 @@ public:
 private:
     int     init();
 public:
-    int     onNewConnection( int fd, struct sockaddr_in& addr  );
+    void    onNewConnection( int*  fd, struct sockaddr_in*  addr  );
     int     onConnection( Connection* conn );
     int     onRead ( Connection* conn );
     int     onWrite( Connection* conn );

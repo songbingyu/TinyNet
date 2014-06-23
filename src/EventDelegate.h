@@ -13,9 +13,9 @@ template < typename  C, typename A1, typename A2  >
 class  EventDelegate
 {
 public:
-    typedef   void  ( C::* Func  )( A1*  arg1, A2* arg2 );
+    typedef   void  ( C::*Func  )( A1*  arg1, A2* arg2 );
 
-    EventDelegate( C* inst, Func func ): inst_( inst ), func_( func )
+    EventDelegate( C*  inst, Func func ): inst_( inst ), func_( func )
     {
 
     }
@@ -27,13 +27,9 @@ public:
 
     }
 
-    /*void callback( T* arg, struct sockaddr_in & addr )
-    {
-        (inst_->*func_ )( arg, addr );
-    }*/
 
 private:
-    C*      inst_;
+    C* const      inst_;
     Func    func_;
 };
 

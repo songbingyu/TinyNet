@@ -6,8 +6,10 @@
 #ifndef     _EVENTEPOLL_H_
 #define     _EVENTEPOLL_H_
 
-
+#include<map>
 #include<vector>
+
+
 struct      epoll_event;
 
 
@@ -27,15 +29,16 @@ class  EventEpoll
 
     int modEvent();
 
-    int waitEvent();
+    int waitEvent( int timeout, ConnectionVec*  activeConns  );
 
  public:
  private:
 
     int epollfd_;
     typedef  std::vector< struct epoll_event >  EventVec;
-
-    EventVec    events_;
+    EventVec            events_;
+    typedef  std::map< int, IConnections* > ConnectionMap;
+    ConnectionMap       connectionMap;
 
 };
 

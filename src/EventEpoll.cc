@@ -3,8 +3,10 @@
     I believe  Spring brother
  */
 
+#include <sys/epoll.h>
+#include "EventEpoll.h"
 
-#include< EventEpoll.h >
+
 
 EventEpoll::EventEpoll( ): epollfd_(-1 ),
                             events_(100)
@@ -41,6 +43,12 @@ int EventEpoll::delEvent()
 
 
 }
+
+int EventEpoll::modEvent()
+{
+
+}
+
 
 int EventEpoll::waitEvent()
 {

@@ -25,7 +25,9 @@ class  EventEpoll
 
     int delEvent();
 
-    int waitEvent();
+    int modvent();
+
+    int epollWait();
 
  public:
     typedef  std::vector< struct epoll_event >  EventVec;

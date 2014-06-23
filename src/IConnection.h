@@ -14,9 +14,9 @@ class IConnection
 {
 
 public:
-    IConnection( int fd, EventLoop* loop, struct sockaddr_in&  addr ): sockfd_( fd ),
-                                                                     loop_( loop ),
-                                                                     addr_( addr )
+    IConnection( int fd, EventLoop* loop, struct sockaddr_in&  localaddr ): sockfd_( fd ),
+                                                                            loop_( loop ),
+                                                                            localAddr_( localaddr )
     {
 
         socketHelper_ = new SocketHelper();
@@ -40,10 +40,13 @@ public:
     virtual int  onClose( ){  return 1; }
 
 public:
+    int     getSockFd( ) const { return sockfd_ ; }
+protected:
     int                 sockfd_;
     EventLoop*          loop_;
-    struct sockaddr_in  addr_;
+    struct sockaddr_in  localAddr_;
     SocketHelper*       socketHelper_;
+    struct sockaddr_in  peerAddr_;
 };
 
 #endif // _ICONNECTION_H_

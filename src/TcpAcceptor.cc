@@ -33,7 +33,7 @@ TcpAcceptor::~TcpAcceptor()
 int TcpAcceptor::bindAndListen( )
 {
 
-    if ( socketHelper_->bind( sockfd_,  &addr_ )  < 0 )
+    if ( socketHelper_->bind( sockfd_,  &localAddr_ )  < 0 )
     {
         exit(1);
     }

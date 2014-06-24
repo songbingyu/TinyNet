@@ -33,10 +33,10 @@ public:
     Connection( int fd,  EventLoop* loop, struct sockaddr_in& addr  );
     ~Connection();
 public:
-    virtual int  onRead( );
+    virtual int  onRead ( );
     virtual int  onWrite( );
     virtual int  onClose( );
-
+    virtual int  onError( );
     int          onConnFinish( );
 public:
     void         setReadCallBack ( ReadCallBack*  cb ) { readCallback_  = cb; }
@@ -48,7 +48,6 @@ private:
     ReadCallBack*    readCallback_;
     WriteCallBack*   writeCallback_;
     CloseCallBack*   closeCallBack_;
-
 };
 
 #endif // _CONNECTION_H_

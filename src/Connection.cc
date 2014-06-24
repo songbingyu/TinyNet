@@ -34,21 +34,45 @@ Connection::~Connection()
 int  Connection::onRead( )
 {
 
+    //read shoule do what?
+    //
+
     if( readCallback_ )
     {
-        readCallback_->callback( this );
+        readCallback_->callback( this, NULL );
     }
     return 1;
 }
 
 int  Connection::onWrite( )
 {
+    if( writeCallback_ )
+    {
+         writeCallback_->callback( this, NULL );
+    }
     return 1;
 }
 
 
 int  Connection::onClose( )
 {
+    state_ = CS_DisConnected;
+    removeEvent();
+#ifdef _DEBUG_
+    assert( NULL != closeCallBack_ );
+#endif
+
+    if( NULL != closeCallBack_ )
+    {
+        closeCallBack_->callback( this, NULL );
+    }
+
+    return 1;
+}
+
+int   Connection::onError( )
+{
+    //TODO: see nginx what ?
     return 1;
 }
 

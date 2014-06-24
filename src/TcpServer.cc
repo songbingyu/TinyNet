@@ -10,7 +10,7 @@
 #include <strings.h>
 #include <assert.h>
 #include <stdlib.h>
-
+#include <algorithm>
 #include "Log.h"
 #include "TcpAcceptor.h"
 #include "Connection.h"
@@ -122,6 +122,15 @@ void TcpServer::onWrite( Connection* conn, int* arg )
 
 void TcpServer::onClose( Connection* conn, int* arg )
 {
+
+    //First call user define func
+
+    //delete from list
+    //
+
+    //should map?
+    std::remove(connectionList_.begin(),connectionList_.end(),conn );
+    delete conn;
 
     return ;
 }

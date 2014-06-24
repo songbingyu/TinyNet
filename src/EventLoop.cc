@@ -6,7 +6,7 @@
 
 #include "EventLoop.h"
 
-EventLoop::EventLoop()
+EventLoop::EventLoop(): isRuning_( true )
 {
     eventEpoll_.epollCreate();
 }
@@ -14,11 +14,18 @@ EventLoop::EventLoop()
 EventLoop::~EventLoop()
 {
 
+    activeConnections_.clear();
 
 }
 
 int  EventLoop::run()
 {
+
+    while( isRuning_  )
+    {
+
+        activeConnections_.clear();
+    }
 
     return 1;
 

@@ -21,10 +21,12 @@ public :
 
 public:
     void update( IConnection* conn ) {  eventEpoll_.addEvent( conn ); }
+    void stop() {  isRuning_ = false; }
 public:
      int run();
 
 private:
+     bool               isRuning_;
      EventEpoll         eventEpoll_;
      ConnectionVec      activeConnections_;
 };

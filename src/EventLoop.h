@@ -20,7 +20,8 @@ public :
      ~EventLoop();
 
 public:
-    void update( IConnection* conn ) {  eventEpoll_.addEvent( conn ); }
+    void addEvent( IConnection* conn ) {  eventEpoll_.addEvent( conn ); }
+    void delEvent( IConnection* conn ) {  eventEpoll_.delEvent( conn ); }
     void stop() {  isRuning_ = false; }
 public:
      int run();

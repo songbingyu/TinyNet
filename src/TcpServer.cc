@@ -91,11 +91,12 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 
     Connection* conn  = new Connection( *fd, loop_ ,*addr );
 
-    conn->setReadCallBack( new ReadCallBack( this, &TcpServer::onRead ) );
+    conn->setReadCallBack(  new ReadCallBack( this, &TcpServer::onRead ) );
     conn->setWriteCallBack( new WriteCallBack( this, &TcpServer::onWrite ));
     conn->setCloseCallBack( new CloseCallBack( this, &TcpServer::onClose ) );
     connectionList_.push_back( conn );
 
+    conn->onConnFinish();
     onConnection( conn );
 
     return ;

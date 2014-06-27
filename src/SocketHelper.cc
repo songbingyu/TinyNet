@@ -83,12 +83,14 @@ int SocketHelper::connect( int fd, const struct sockaddr_in* addr )
 int SocketHelper::read( int fd, char* buf, int count )
 {
 
+    //TODO: readv ?
     return ::read( fd, buf, count );
 
 }
 
 int SocketHelper::write( int fd, char* buf, int count )
 {
+    //TODO:writev ?
     return ::write( fd, buf, count );
 }
 

@@ -35,7 +35,12 @@ int  Connection::onRead( )
 {
 
     //read shoule do what?
-    //
+
+    int ret = readBuf_.push(socketHelper_, sockfd_ );
+    if( ret < 0  )
+    {
+        onClose();
+    }
 
     if( readCallback_ )
     {

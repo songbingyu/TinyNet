@@ -3,21 +3,23 @@
     I believe  Spring brother
  */
 
+#include<errno.h>
 #include<assert.h>
 #include"Log.h"
 
-
-template < typename  T >
+// Fixme: consider other way?
+//
+template < typename  T, size_t N   >
 class  CircularBuffer
 {
 public:
-    CircularBuffer( int N ): begin_(0), end_( begin_ ),size_( 0 ), data_( NULL )
+    CircularBuffer( ): begin_(0), end_( begin_ ),size_( 0 ), data_( NULL )
     {
 #ifdef  _DEBUG_
         assert( N > 0 );
 #endif
         data_  = new T[N];
-        size   = N;
+        size_   = N;
     }
 
    ~CircularBuffer()
@@ -30,47 +32,93 @@ public:
     }
 
 public:
-   int      size() { retuen size_; }
-   int      capacity( ) {  return end_ > begin_ ?  end_ - begin_ : end_ + size_ - begin_;  }
-   int      freeSize()  {  return  size_ - capacity();    }
-   bool     push( T& v, bool isOver   )
+   int      size()      {  return   size_; }
+   int      capacity()  {  return   end_ >= begin_ ?  end_ - begin_ : end_ + size_ - begin_;  }
+   int      freeSize()  {  return   size_ - capacity();    }
+
+   bool     push( T*  data, int  count, bool isOver = false  )
    {
-        if( ( end_ + 1 )% size_ == begin_ )
+        if( ( end_ + count )% size_ >= begin_ )
         {
-            if( !isOver )
-            {
                 LOG_ERROR(" circual buffer is over ");
-                retuen false;
+                return false;
+        }
+
+        if( end_ >= begin_ )
+        {
+            if( count > ( size_ - end_ ) )
+            {
+                memcpy( data_+ end_, data, ( size_ -  end_ )*sizeof(T) );
+                memcpy( data_, data, ( count - size_ +  end_ )*sizeof(T) );
             }
             else
             {
-              data_[ end_ ] = v;
-              begin_ = ( begin_+ 1 )% size_;
-              end_   = ( end_  + 1 )% size_;
-
-              retuen true;
+                memcpy( data_ + end_, data, count*sizeof(T) );
             }
+
+        }
+        else
+        {
+            memcpy( data_ + end_, data_, count*sizeof(T));
         }
 
-        data_[ end_ ] = v;
-        end_ = ( end_ +1 )% size_;
-        retuen true;
+        end_ = ( end_ + count )% size_;
+        return true;
    }
 
-    bool   pop( T& v )
+    int     push( SocketHelper* socketHelper, int fd )
     {
-        if( capacity() == 0 )  return false;
+            // should read 2 ?
+            int len =  begin_ <=  end_ ? size_ - end_ : begin_ - end_ ;
+            int ret =  socketHelper->read( fd ,  data_ + end_ ,  len  );
+            if( ret == 0 )
+            {
+                return -1;
+            }
+            else  if( ret < 0 )
+            {
+                if(  errno != EWOULDBLOCK || errno != EAGAIN )  return -2;
+            }
+            else
+            {
+                end_ = (end_ +  ret )% size_;
+            }
 
-        v  =  data_[ begin_ ];
-        begin_ = ( begin_+ 1 )% size_;
-
+            return 0;
     }
+
+    bool    pop( char* buf, int cnt )
+    {
+
+            if( capacity() < cnt  )  return false;
+
+            if( end_ <=  begin_  )
+            {
+                if( cnt > (size_ - begin_) )
+                {
+                    memcpy( buf, data_ + begin_, ( size_ - begin_ )*sizeof(T) );
+                    memcpy( buf, data_, ( cnt - (size_ - begin_ )*sizeof(T)));
+                }
+                else
+                {
+                    memcpy( buf, data_ + begin_,  cnt*sizeof(T));
+                }
+            }
+            else
+            {
+                memcpy(buf, data_+ begin_, cnt*sizeof(T));
+            }
+
+            begin_ = ( begin_ + cnt)% size_;
+            return true;
+    }
+
 private:
 
-    int  begin_;
-    int  end_;
-    int  size_;
-    T*   data_;
+    size_t   begin_;
+    size_t   end_;
+    size_t   size_;
+    T*       data_;
 };
 
 

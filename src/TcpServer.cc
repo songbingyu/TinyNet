@@ -17,6 +17,15 @@
 #include "EventLoop.h"
 #include "TcpServer.h"
 
+void PrintLog()
+{
+    printf("--------Welcome to use TinyNet CopyRight by bingyu ----------\n");
+    printf("everything is ok, Let go \n");
+
+}
+
+
+
 TcpServer::TcpServer( int port ): port_( port )
 {
     init();
@@ -38,6 +47,7 @@ TcpServer::~TcpServer()
 int TcpServer::init( )
 {
 
+    PrintLog();
     loop_ = new EventLoop();
     assert( loop_ != NULL );
     assert( port_  >= 1024 );
@@ -55,12 +65,16 @@ int TcpServer::init( )
         exit(1);
     }
 
+    LOG_INFO("create socket sucess:%d", listenfd );
+
     acceptor_ = new TcpAcceptor( listenfd, loop_ , addr );
 
     if ( NULL == acceptor_  )
     {
         exit(1);
     }
+
+    LOG_INFO("create TcpAcceptor sucess ");
 
     acceptor_->setNewConnectionCallBack( new NewConnectionCallBack( this, &TcpServer::onNewConnection ));
 
@@ -104,20 +118,21 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 
 int TcpServer::onConnection( Connection* conn )
 {
-    LOG_INFO(" receive new connection ");
+    LOG_INFO(" receive new connection %d ", conn->getSockFd() );
     return 1;
 }
 
 
 void TcpServer::onRead( Connection* conn, int* arg  )
 {
+    LOG_INFO(" read conn ");
     return ;
 }
 
 void TcpServer::onWrite( Connection* conn, int* arg )
 {
+    LOG_INFO(" write conn ");
     return ;
-
 }
 
 void TcpServer::onClose( Connection* conn, int* arg )
@@ -129,6 +144,7 @@ void TcpServer::onClose( Connection* conn, int* arg )
     //
 
     //should map?
+    LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());
     std::remove(connectionList_.begin(),connectionList_.end(),conn );
     delete conn;
 

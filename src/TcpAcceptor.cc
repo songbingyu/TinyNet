@@ -34,15 +34,22 @@ TcpAcceptor::~TcpAcceptor()
 int TcpAcceptor::bindAndListen( )
 {
 
+    //Fixme: add  socket option
+
     if ( socketHelper_->bind( sockfd_,  &localAddr_ )  < 0 )
     {
         exit(1);
     }
 
+    LOG_INFO(" bind socket success ");
+
+
     if( socketHelper_->listen( sockfd_ ) < 0 )
     {
         exit(1);
     }
+
+    LOG_INFO(" listen  socket success ");
 
     isListening_ = true;
 

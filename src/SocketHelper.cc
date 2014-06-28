@@ -15,14 +15,14 @@
 int SocketHelper::createNonBlockingSocket( )
 {
     int fd = ::socket( AF_INET, SOCK_STREAM|SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP );
-    if( fd < 0 ) LOG_ERROR( "create socket fail ", 1);
+    if( fd < 0 ) LOG_ERROR( "create socket fail i. errno:%d ", errno );
     return fd;
 }
 
 int SocketHelper::bind( int fd, const struct sockaddr_in* addr )
 {
-    int r = ::bind( fd, (const struct sockaddr*)addr, (socklen_t)sizeof(addr) );
-    if( r < 0 ) LOG_ERROR( " bind fail ", 1);
+    int r = ::bind( fd, (const struct sockaddr*)addr, (socklen_t)sizeof(*addr) );
+    if( r < 0 ) LOG_ERROR( " bind fail errno:%d ", errno);
 
     return r;
 }
@@ -77,7 +77,7 @@ int SocketHelper::accept( int fd, struct  sockaddr_in* addr )
 
 int SocketHelper::connect( int fd, const struct sockaddr_in* addr )
 {
-    return  ::connect( fd, (const struct sockaddr*)addr, (socklen_t )( sizeof(addr) )  );
+    return  ::connect( fd, (const struct sockaddr*)addr, (socklen_t )( sizeof(*addr) )  );
 }
 
 int SocketHelper::read( int fd, char* buf, int count )

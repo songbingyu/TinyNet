@@ -7,11 +7,12 @@
 
 #include <netinet/in.h>
 #include <sys/epoll.h>
+#include "nocopyable.h"
 #include "EventLoop.h"
 #include "SocketHelper.h"
 
-
-class IConnection
+// you know Connection must be  not copy
+class IConnection: public nocopyable
 {
 
 public:

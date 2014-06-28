@@ -8,19 +8,20 @@
 
 #include <map>
 #include <vector>
+#include "nocopyable.h"
 
 struct      epoll_event;
 class       IConnection;
 
 
 // epoll wraper
-class  EventEpoll {
+class  EventEpoll : public nocopyable
+{
 public :
     EventEpoll();
     ~EventEpoll();
 public:
-
-    int epollCreate();
+    // see libevent ,find something is  trick stupid....
 
     int addEvent( IConnection* conn );
 
@@ -29,6 +30,8 @@ public:
     int waitEvent( int timeout, std::vector<IConnection*>*  activeConns  );
 
 private:
+    int  epollCreate();
+
     int  epollCtl( int oper, IConnection* conn );
 private:
 

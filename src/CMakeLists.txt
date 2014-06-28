@@ -28,6 +28,7 @@ set(LIBRARY_OUTPUT_PATH    ${PROJECT_BINARY_DIR}/lib)
 
 
 ADD_LIBRARY(TinyNet  SHARED ${SRC_LIST})
+#add_executable(server_test  ${SRC_LIST} )
 
 
 

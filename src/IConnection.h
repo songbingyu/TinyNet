@@ -11,6 +11,17 @@
 #include "EventLoop.h"
 #include "SocketHelper.h"
 
+//just for  add to epoll  state control
+enum EventState
+{
+    ES_New,
+    ES_Added,
+    ES_Del,
+};
+
+
+
+
 // you know Connection must be  not copy
 class IConnection: public nocopyable
 {
@@ -18,7 +29,8 @@ class IConnection: public nocopyable
 public:
     IConnection( int fd, EventLoop* loop, struct sockaddr_in&  localaddr ): sockfd_( fd ),
                                                                             loop_( loop ),
-                                                                            localAddr_( localaddr )
+                                                                            localAddr_( localaddr ),
+                                                                            eventState_( ES_New )
     {
         socketHelper_ = new SocketHelper();
 
@@ -26,6 +38,8 @@ public:
     ~IConnection( )
     {
         //Fixme: should close socket ?
+
+        eventState_ = ES_Del;
         socketHelper_->close( sockfd_ );
         sockfd_ = -1;
         loop_ = NULL;
@@ -46,12 +60,18 @@ public:
     void    setEvents( int ev )     { events_ = ev;       }
     int     getEvents( ) const      { return events_;     }
     void    setReadEvents( int ev ) { readEvents_ = ev;   }
-    int     getReadEvents() const   { return readEvents_; }
-    void    enableRead( )           { events_ |= ( EPOLLIN | EPOLLPRI ); addEvent();  }
-    void    enableWrite( )          { events_ |=  EPOLLOUT;  addEvent();    }
-    void    removeEvent( )          { events_ = 0 ; delEvent();    }
-    void    addEvent( )             { loop_->addEvent( this );             }
-    void    delEvent( )             { loop_->delEvent( this );             }
+    int     getReadEvents( ) const  { return readEvents_; }
+    void    enableRead( )           { events_ |= ( EPOLLIN | EPOLLPRI ); updateEvent();  }
+    void    enableWrite( )          { events_ |=  EPOLLOUT;              updateEvent();  }
+    void    setEventState( EventState state ) {  eventState_ = state; }
+    EventState  getEventState() const { return eventState_; }
+    void    removeEvent( )          { events_ = 0 ; delEvent();             }
+    bool    isNoneEvent( )          {  return events_ == 0 ;                        }
+private:
+    // add mod
+    void    updateEvent( )          { loop_->updateEvent( this );           }
+    // del
+    void    delEvent( )             { loop_->delEvent( this );              }
 protected:
     int                 sockfd_;
     EventLoop*          loop_;
@@ -60,7 +80,7 @@ protected:
     //struct sockaddr_in  peerAddr_;
     int                 events_;
     int                 readEvents_;
-
+    EventState    eventState_;
 };
 
 #endif // _ICONNECTION_H_

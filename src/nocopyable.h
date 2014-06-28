@@ -16,7 +16,7 @@ protected:
 private:
     nocopyable( nocopyable& );
     nocopyable& operator=( nocopyable& );
-}
+};
 
 
 #endif // _NOCOPYABLE_H_

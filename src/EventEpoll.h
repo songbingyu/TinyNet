@@ -23,6 +23,10 @@ public :
 public:
     // see libevent ,find something is  trick stupid....
 
+    // update?
+
+    int updateEvent( IConnection* conn );
+
     int addEvent( IConnection* conn );
 
     int delEvent( IConnection* conn );

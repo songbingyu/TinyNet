@@ -45,7 +45,8 @@ public :
             (void) vsnprintf( logbuf , 512 , fmt, ap);
             va_end(ap);
 
-            sprintf(buf,"[%s]%s %s %s %d : ", logLevel, date, time, file, line );
+            const char*  filename = strrchr( file, '/');
+            sprintf(buf,"[%s]%s %s %s %d : ", logLevel, date, time, filename+1, line );
             strcat( buf, logbuf );
             strcat( buf, "\n"   );
             printf( buf );

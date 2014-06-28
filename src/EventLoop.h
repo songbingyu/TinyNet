@@ -6,22 +6,23 @@
 #ifndef   _EVENTLOOP_H_
 #define   _EVENTLOOP_H_
 
-#include<vector>
+#include <vector>
+#include "nocopyable.h"
 #include "EventEpoll.h"
 
 class IConnections;
 
 typedef std::vector<IConnection*>  ConnectionVec;
 
-class  EventLoop
+class  EventLoop: public nocopyable
 {
 public :
      EventLoop();
      ~EventLoop();
 
 public:
-    void addEvent( IConnection* conn ) {  eventEpoll_.addEvent( conn ); }
-    void delEvent( IConnection* conn ) {  eventEpoll_.delEvent( conn ); }
+    void updateEvent( IConnection* conn ) {  eventEpoll_.updateEvent( conn ); }
+    void delEvent( IConnection* conn )    {  eventEpoll_.delEvent( conn ); }
     void stop() {  isRuning_ = false; }
 public:
      int run();

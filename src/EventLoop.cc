@@ -10,7 +10,6 @@
 
 EventLoop::EventLoop(): isRuning_( true )
 {
-    eventEpoll_.epollCreate();
 }
 
 EventLoop::~EventLoop()

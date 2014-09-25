@@ -107,7 +107,7 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 
     conn->setReadCallBack(  new ReadCallBack( this, &TcpServer::onRead ) );
     conn->setWriteCallBack( new WriteCallBack( this, &TcpServer::onWrite ));
-    conn->setCloseCallBack( new CloseCallBack( this, &TcpServer::onClose ) );
+    conn->setCloseCallBack( new CloseCallBack( this, &TcpServer::onRemoveConnection ) );
     connectionList_.push_back( conn );
 
     conn->onConnFinish();
@@ -115,6 +115,18 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 
     return ;
 }
+
+void TcpServer::onRemoveConnection( Connection* conn, int* arg )
+{
+    onClose( conn );
+
+    //should map?
+    LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());
+    std::remove(connectionList_.begin(),connectionList_.end(),conn );
+    delete conn;
+
+}
+
 
 int TcpServer::onConnection( Connection* conn )
 {
@@ -135,18 +147,13 @@ void TcpServer::onWrite( Connection* conn, int* arg )
     return ;
 }
 
-void TcpServer::onClose( Connection* conn, int* arg )
+void TcpServer::onClose( Connection* conn )
 {
 
     //First call user define func
 
     //delete from list
     //
-
-    //should map?
-    LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());
-    std::remove(connectionList_.begin(),connectionList_.end(),conn );
-    delete conn;
 
     return ;
 }

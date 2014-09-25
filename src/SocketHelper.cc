@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>// for TCP_NODELAY
 #include <sys/uio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -114,8 +115,61 @@ int SocketHelper::shutdown( int fd )
 
 }
 
+int SocketHelper::setTcpNoDelay( int fd, bool isOpen )
+{
+    int optval = isOpen ? 1 : 0;
+    int ret =  setsockopt( fd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof( optval ));
+    if( ret < 0 )
+    {
+        LOG_ERROR(" set socket[%d] TCP_NODELAY fail, errno:%d", fd,errno );
+    }
+
+    return 1;
+}
+
+int SocketHelper::setReuseAddr( int fd, bool isOpen )
+{
+    int optval = isOpen ? 1 : 0;
+    int ret = setSocketOpt( fd, SO_REUSEADDR, optval );
+    if( ret < 0 )
+    {
+        LOG_ERROR(" set sockt[%d] SO_REUSEADDR fail, errno:%d", fd, errno );
+    }
+
+    return 1;
+
+}
+
+int SocketHelper::setReusePort( int fd, bool isOpen )
+{
+    int optval = isOpen ? 1 : 0;
+    int ret = setSocketOpt( fd, SO_REUSEPORT, optval );
+    if( ret < 0 )
+    {
+        LOG_ERROR(" set socket[%d] SO_REUSEPORT fail, errno:%d", fd,errno );
+    }
+
+    return 1;
+
+}
 
 
+int SocketHelper::setKeepAlive( int fd, bool isOpen )
+{
+    int optval = isOpen ? 1 : 0;
+    int ret = setSocketOpt( fd, SO_KEEPALIVE, optval );
+    if( ret < 0 )
+    {
+        LOG_ERROR(" set socket[%d] SO_KEEPALIVE fail, errno:%d", fd,errno );
+    }
+    return 1;
+}
+
+
+int setSocketOpt( int fd, int optname, int& optval )
+{
+    return setsockopt( fd, SOL_SOCKET, optname, &optval, sizeof( optval ));
+}
 
 
 

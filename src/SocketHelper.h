@@ -21,9 +21,19 @@ public:
     int     read( int fd, char* buf, int len );
     int     write( int fd, char* buf, int len );
     //TODO  readv writev
+    int     readv(int fd, const struct iovec* iov, int iovcnt );
+
     int     close( int fd );
     int     shutdown( int fd );
 
+    //set socket
+    int     setTcpNoDelay( int fd,bool isOpen );
+    int     setReuseAddr ( int fd,bool isOPen );
+    int     setReusePort ( int fd,bool isOPen );
+    int     setKeepAlive ( int fd,bool isOpen );
+
+private:
+    int     setSocketOpt( int fd,int optname, int& optval );
 };
 
 

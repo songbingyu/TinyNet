@@ -26,10 +26,12 @@ private:
     int     init();
 public:
     void    onNewConnection( int*  fd, struct sockaddr_in*  addr  );
+    void    onRemoveConnection( Connection* conn, int* arg = NULL );
+public:
     int     onConnection( Connection* conn );
     void    onRead ( Connection* conn, int*  arg= NULL );
     void    onWrite( Connection* conn, int*  arg= NULL );
-    void    onClose( Connection* conn, int*  arg= NULL );
+    void    onClose( Connection* conn );
 private:
     int                     port_;
     TcpAcceptor*            acceptor_;

@@ -7,12 +7,18 @@
 #define   _EVENTLOOP_H_
 
 #include <vector>
+#include <sys/types.h>
+#include <unistd.h>
 #include "nocopyable.h"
 #include "EventEpoll.h"
+#include "Event.h"
 
+class ActiveFdEvent;
 class IConnections;
+class PendingEvent;
+class IPoller;
 
-typedef std::vector<IConnection*>  ConnectionVec;
+typedef std::vector<ActiveEvent*> ActiveEventVec;
 
 class  EventLoop: public nocopyable
 {
@@ -21,16 +27,50 @@ public :
      ~EventLoop();
 
 public:
-    void updateEvent( IConnection* conn ) {  eventEpoll_.updateEvent( conn ); }
-    void delEvent( IConnection* conn )    {  eventEpoll_.delEvent( conn ); }
     void stop() {  isRuning_ = false; }
+
 public:
      int run();
-
+public:
+     void addPendingEvent( IEvent* ev, int evFlag );
+     void delPendingEvent(IEvent* ev );
+     void addActiveFdEvent ( EventIo* ev );
+     void delActiveFdEvent ( EventIo* ev );
+     void addTimer( EventTimer ev );
+     void delTimer( EventTimer ev );
+     void addFeedReverse( IEvent* ev );
+     void feedReverseDone( int revents );
+     tiny_forceinline  ActiveFdEvent*  getActiveFdEventByFd( int fd );
+     tiny_forceinline void addActiveCnt() { ++activeCnt_; }
+     tiny_forceinline void delActiveCnt() { --activeCnt_; }
+     tiny_forceinline Timestamp   getNowTime() const  { return curTime_; }
+     tiny_forceinline int         getTimerCount()     { return timers_.size() - 1; }
+     tiny_forceinline void  setIoBlockTime( Timestamp interval ) { ioBlockTime_ = interval; }
+     void invokePending();
 private:
-     bool               isRuning_;
-     EventEpoll         eventEpoll_;
-     ConnectionVec      activeConnections_;
+     IPoller* getRecommendedPoller();
+     tiny_forceinline   bool addChangeFd( int fd, int flags );
+     tiny_forceinline   void fdReify();
+     tiny_forceinline   void updateTime( Timestamp maxBlockTime );
+     tiny_noinline tiny_cold void timerReSchedule( Timestamp adjust );
+     tiny_forceinline   void timersReify();
+private:
+
+    typedef  std::vector<PendingEvent*>   PendingArr;
+    PendingArr          pendingEvents_;
+    bool                isRuning_;
+    IPoller*            poller_;
+    typedef std::vectori<ActiveFdEvent*>  ActiveFdArr;
+    ActiveFdArr         activeFdEvents_;
+    typedef std::vector<int>            ChangeFdArr;
+    ChangeFdArr         changeFds_;
+    pid_t               curPid_;
+    int                 activeCnt_;
+    HeapVec             timers_;
+    typedef std::vector<IEvent*>  ReverseArr;
+    ReverseArr          rFeeds_;
+    Timestamp           curTime_;
+    Timestamp           ioBlockTime_;
 };
 
 

@@ -9,41 +9,43 @@
 #include <map>
 #include <vector>
 #include "nocopyable.h"
+#include "IPoller.h"
 
 struct      epoll_event;
-class       IConnection;
+//class       IConnection;
 
 
 // epoll wraper
-class  EventEpoll : public nocopyable
+class  EventEpoll : public IPoller
 {
 public :
-    EventEpoll();
-    ~EventEpoll();
+    EventEpoll( EventLoop* loop );
+    virtual ~EventEpoll();
 public:
     // see libevent ,find something is  trick stupid....
 
     // update?
 
-    int updateEvent( IConnection* conn );
+    virtual void  updateEvent( int fd, int oev, int nev  );
 
-    int addEvent( IConnection* conn );
+    //int addEvent( IConnection* conn );
 
-    int delEvent( IConnection* conn );
+    //int delEvent( IConnection* conn );
 
-    int waitEvent( int timeout, std::vector<IConnection*>*  activeConns  );
+    virtual void waitEvent( Timestamp ts );
 
 private:
     int  epollCreate();
-
-    int  epollCtl( int oper, IConnection* conn );
 private:
 
     int epollfd_;
     typedef  std::vector< struct epoll_event >  EventVec;
     EventVec            events_;
+    int     epollEventMax_;
     typedef  std::map< int, IConnection* >     ConnectionMap;
     ConnectionMap       connectionMap;
+    typedef std::vector<int>            EpermsFdArr;
+    EpermsFdArr         epermFds_;
 
 };
 

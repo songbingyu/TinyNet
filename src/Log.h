@@ -24,6 +24,7 @@ public:
         LOG_DEBUG,
         LOG_WARN,
         LOG_ERROR,
+        LOG_SYS,
     };
 
     enum
@@ -58,6 +59,7 @@ public :
 #define     LOG_DEBUG( fmt, ... )    Log::WriteLog( "DEBUG",  __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
 #define     LOG_WARN(  fmt, ... )    Log::WriteLog( "WARN",   __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
 #define     LOG_ERROR( fmt, ... )    Log::WriteLog( "ERROR",  __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
+#define     LOG_SYS( fmt, ... )      Log::WriteLog( "SYS",    __FILE__, __LINE__, __DATE__, __TIME__, fmt, ## __VA_ARGS__  )
 
 
 

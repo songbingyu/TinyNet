@@ -4,18 +4,20 @@
  */
 
 
+#include "EventEpoll.h"
 #include <assert.h>
 #include <errno.h>
 #include <sys/epoll.h>
 #include <unistd.h>
 #include "Log.h"
-#include "IConnection.h"
-#include "EventEpoll.h"
+#include "Event.h"
+#include "EventLoop.h"
+#include "ActiveEvent.h"
 
 
+#define  EV_EPERM   0x80
 
-EventEpoll::EventEpoll(): epollfd_(-1 ),
-                           events_(100)
+EventEpoll::EventEpoll( EventLoop* loop ): IPoller( loop ), epollfd_( -1 ),epollEventMax_(64),events_( epollEventMax_ )
 {
     epollCreate() ;
 }
@@ -56,199 +58,131 @@ const char* eventStateToString( EventState  es )
 }
 
 
-int EventEpoll::updateEvent( IConnection* conn )
+void  EventEpoll::updateEvent( int fd, int oev, int nev )
 {
-    EventState st = conn->getEventState();
+    LOG_INFO(" updtate event to epoll fd :%d old event :%d new event: %d  ", fd, oev, nev );
 
-    LOG_INFO(" updtate event to epoll :%s ", eventStateToString( st ) );
-    int fd = conn->getSockFd();
+    //libev
+    if( !nev )   return;
 
-    if( st == ES_New )
-    {
-#ifdef  _DEBUG_
-        ConnectionMap::iterator  it = connectionMap.find( fd );
-        if ( it != connectionMap.end() )
-        {
-            connectionMap[ fd ] = conn;
-        }
-        LOG_ERROR("fd:%d has addded to map!")
-#endif  //_DEBUG_
+    struct epoll_event  ev;
+    bzero( &ev, sizeof(ev) );
 
-        //Fixme should check?
-        //assert( !conn->isNoneEvent() );
+    ActiveFdEvent*  activeEv  = loop_->getActiveFdEventByFd( fd );
+    int oldRevents = activeEv->revents_;
+    activeEv->revents_ = nev;
 
-        connectionMap[ fd ] = conn;
-        conn->setEventState( ES_Added );
-        epollCtl( EPOLL_CTL_ADD, conn );
-    }
-    else if( st == ES_Added )
-    {
-#ifdef  _DEBUG_
-        ConnectionMap::iterator  it = connectionMap.find( fd );
-        assert( it != connectionMap.end() );
-        assert( it->second == conn );
-#endif //_DEBUG_
+    ev.data.u64  = (uint64_t)(uint32_t)fd |
+                (uint64_t)(uint32_t)++activeEv->egen_ << 32;
+    ev.events    = ( nev & EV_READ ? EPOLLIN : 0 )
+                | ( nev & EV_WRITE ? EPOLLOUT : 0 );
 
-        //Fixeme: shoule process events_ == 0 ?
-        if( conn->isNoneEvent() )
-        {
-            conn->setEventState( ES_Del );
-            epollCtl( EPOLL_CTL_DEL, conn );
-        }
-        else
-        {
-            epollCtl( EPOLL_CTL_MOD, conn );
-        }
-    }
-    else// ES_DEL
-    {
-
-#ifdef  _DEBUG_
-        ConnectionMap::iterator  it = connectionMap.find( fd );
-        assert( it != connectionMap.end() );
-        assert( it->second == conn );
-#endif //_DEBUG_
-        conn->setEventState( ES_Del );
-        epollCtl( EPOLL_CTL_DEL, conn );
-
+    if( expect_true( !epoll_ctl( epollfd_, oev&&oldRevents != nev ? EPOLL_CTL_MOD: EPOLL_CTL_ADD, fd, &ev) ) ){
+        return;
     }
 
-    return 1;
-}
-
-int EventEpoll::addEvent( IConnection* conn  )
-{
-    int fd = conn->getSockFd();
-
-    if( conn->getEvents() == 0  )
-    {
-        LOG_ERROR( " socket %d not set events", fd );
-        return 1;
-    }
-
-
-    ConnectionMap::iterator  it = connectionMap.find( fd );
-    if ( it != connectionMap.end() )
-    {
-        connectionMap[ fd ] = conn;
-    }
-
-    epollCtl( EPOLL_CTL_ADD, conn );
-
-    return 1;
-}
-
-int EventEpoll::delEvent( IConnection* conn )
-{
-
-    int fd = conn->getSockFd();
-
-    LOG_INFO("Del event from epoll:%d ", fd );
-
-    ConnectionMap::iterator  it = connectionMap.find( fd );
-    if ( it == connectionMap.end() )
-    {
-        LOG_ERROR( " not find socket %d in connectionMap ", fd );
-        return 1;
-    }
-
-    if( it->second != conn )
-    {
-        LOG_ERROR( " I don't know what happen ?  ", fd );
-        return 1;
-    }
-    connectionMap.erase( it );
-
-    epollCtl( EPOLL_CTL_DEL, conn );
-
-    return 1;
-
-}
-
-
-
-int EventEpoll::epollCtl( int oper, IConnection* conn )
-{
-    struct epoll_event event;
-    bzero( &event, sizeof(event) );
-    event.events   = conn->getEvents();
-    event.data.ptr = conn;
-    int sockfd     = conn->getSockFd();
-
-    int ret = epoll_ctl( epollfd_, oper, sockfd, &event );
-    if( ret ==  -1  )
-    {
-        // consider from libevent2
-        if( oper == EPOLL_CTL_MOD && errno == ENOENT )
-        {
-            if( epoll_ctl( epollfd_ , EPOLL_CTL_ADD, sockfd, &event ) == -1 )
-            {
-                LOG_ERROR(" EPOLL mod:%d on %d retry on ADD that fail ",
-                                                conn->getEvents(), sockfd);
-            }
-            else
-            {
-                LOG_ERROR(" EPOLL mod:%d on %d retry on ADD success ",
-                                                conn->getEvents(), sockfd );
+    if( expect_true( errno == ENOENT ) ) {
+        if( !nev ) {
+            goto  dec_egen;
+            if( !epoll_ctl( epollfd_, EPOLL_CTL_ADD, fd, &ev ) ) {
+                return;
             }
         }
-        else if( oper == EPOLL_CTL_ADD && errno == EEXIST )
-        {
-            if( epoll_ctl( epollfd_ , EPOLL_CTL_MOD, sockfd, &event ) == -1 )
-            {
-                LOG_ERROR(" EPOLL add :%d on %d retry on mod that fail ",
-                                                    conn->getEvents(), sockfd);
-            }
-            else
-            {
-                LOG_ERROR(" EPOLL add :%d on %d retry on mod success ",
-                                                    conn->getEvents(), sockfd );
-            }
+    } else if( expect_true( errno == EEXIST ) ) {
+        if( oldRevents == nev ) {
+            goto  dec_egen;
+        }
 
+        if( !epoll_ctl( epollfd_, EPOLL_CTL_MOD, fd, &ev ) ) {
+            return;
         }
-        else if( oper == EPOLL_CTL_DEL &&
-                ( errno == ENOENT || errno == EBADF || errno == EPERM ) )
-        {
-            LOG_ERROR(" EPOLL del:%d in %d fail ",
-                                            conn->getEvents(), sockfd );
-        }
-        else
-        {
+    } else if( expect_true( errno == EPERM ) ) {
+        activeEv->revents_ = EV_EPERM;
 
-            LOG_ERROR(" epool_ctl faila...:%d, fd:%d, events:%d ", oper, sockfd, conn->getEvents() );
+        if( !( oldRevents & EV_EPERM ) ){
+            this->epermFds_.push_back( fd );
         }
+        return;
     }
 
-    return 1;
+    //This is a error
+    activeEv->killFd( loop_ );
+
+dec_egen:
+
+    activeEv->egen_--;
+
+
+    return ;
 }
 
-int EventEpoll::waitEvent( int timeout, std::vector<IConnection*>*  activeConns )
+void  EventEpoll::waitEvent( Timestamp ts )
 {
 #ifdef _DEBUG_
-    assert( epollfd_ != NULL );
+   // assert( epollfd_ != NULL );
 #endif
-    int numEvents =  epoll_wait( epollfd_, &*events_.begin(), (int)events_.size(), timeout );
-    if( numEvents > 0 )
-    {
 
-            assert( numEvents < (int)events_.size() );
-            for( int i=0; i < numEvents; ++i )
-            {
-                IConnection* conn = (IConnection*)events_[i].data.ptr;
-                conn->setReadEvents( events_[i].events );
-                activeConns->push_back( conn );
+    if( expect_false( epermFds_.size() ) ) {
+        ts = 0;
+    }
+
+    int numEvents =  epoll_wait( epollfd_, &*events_.begin(), (int)events_.size(), ts*1e3 );
+
+    if( expect_false( numEvents < 0 ) ) {
+        if( errno != EINTR ){
+            LOG_ERROR(" epoll_wait error");
+        }
+    }
+
+    for ( int i=0; i < numEvents;  ++i ) {
+
+        struct  epoll_event*  ev = &events_[i];
+        int     fd      = (uint32_t)ev->data.u64;
+        ActiveFdEvent*  activeEv =  loop_->getActiveFdEventByFd( fd );
+
+        int     want    =  activeEv->events_;
+
+        int     got     =  ( ev->events &( EPOLLOUT|EPOLLERR|EPOLLHUP)? EV_WRITE : 0 )
+                        |  ( ev->events &(EPOLLIN|EPOLLERR|EPOLLHUP)? EV_READ : 0 );
+
+        if( expect_false((uint32_t)activeEv->egen_ != (uint32_t)( ev->data.u64>>32 ))){
+            continue;
+        }
+
+        if( expect_false( got & ~want )) {
+
+            activeEv->revents_ = want;
+
+            ev->events = ( want & EV_READ ? EPOLLIN  : 0 )
+                        |( want & EV_WRITE? EPOLLOUT : 0 );
+            if( epoll_ctl( epollfd_, want? EPOLL_CTL_MOD:EPOLL_CTL_DEL, fd, ev )){
+                continue;
             }
-    }
-    else if ( numEvents == 0  )
-    {
-        //LOG_INFO(" no events ");
-    }
-    else
-    {
+        }
 
-        LOG_INFO(" error events:%d ", errno );
+        activeEv->fdEvent( loop_, got );
     }
-    return 1;
+
+    if( expect_false( numEvents == epollEventMax_ )) {
+        //TODO: find a suitable size ?
+        epollEventMax_ *= 2;
+        events_.resize( epollEventMax_ );
+    }
+
+    int epermCnt = epermFds_.size();
+
+    for( int i= epermCnt-1; i>=0;  --i ){
+        int fd = epermFds_[i];
+        ActiveFdEvent*  activeEv =  loop_->getActiveFdEventByFd( fd );
+        int events  =   activeEv->events_&( EV_READ | EV_WRITE );
+        if( activeEv->revents_ & EV_EPERM && events ){
+            activeEv->fdEvent( loop_, events );
+        } else {
+            epermFds_[i]= epermFds_[ epermFds_.size()-1];
+            epermFds_.pop_back();
+        }
+    }
+
 }
 
 

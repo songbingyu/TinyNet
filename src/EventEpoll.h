@@ -37,13 +37,10 @@ public:
 private:
     int  epollCreate();
 private:
-
     int epollfd_;
+    int     epollEventMax_;
     typedef  std::vector< struct epoll_event >  EventVec;
     EventVec            events_;
-    int     epollEventMax_;
-    typedef  std::map< int, IConnection* >     ConnectionMap;
-    ConnectionMap       connectionMap;
     typedef std::vector<int>            EpermsFdArr;
     EpermsFdArr         epermFds_;
 

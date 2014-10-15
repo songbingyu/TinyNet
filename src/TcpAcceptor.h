@@ -7,7 +7,7 @@
 #define  _TCPACCEPTOR_H_
 
 
-#include"EventDelegate.h"
+#include"CallBackDelegate.h"
 #include"IConnection.h"
 
 class SocketHelper;
@@ -15,7 +15,7 @@ class SocketHelper;
 class TcpServer;
 class Connection;
 
-typedef  EventDelegate<TcpServer, int, struct sockaddr_in  >     NewConnectionCallBack;
+typedef  CallBackDelegate<TcpServer, int, struct sockaddr_in >     NewConnectionCallBack;
 
 class TcpAcceptor : public IConnection
 {

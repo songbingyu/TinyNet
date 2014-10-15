@@ -8,12 +8,16 @@
 
 #include "TinyDefine.h"
 #include "CallBackDelegate.h"
-#include "EventLoop.h"
 #include "Log.h"
+
+class  EventLoop;
 
 typedef     void (*EV_CB)( EventLoop* loop,int revents );
 
-typedef     double      Timestamp;
+
+class       TimerEventList;
+typedef     TimerEventList  TimerHeap;
+typedef     std::vector< TimerHeap* >  HeapVec;
 
 enum  EventIOType
 {
@@ -35,7 +39,7 @@ enum
     EV_SIGNAL   =   0x00000400,
     EV_IDLE     =   0x00001000,
     EV_ERROR    =   0x80000000,
-}
+};
 
 // all event base
 
@@ -54,26 +58,9 @@ protected:
         data_       = NULL;
     }
 public:
-    tiny_forceinline void  onEvent( EventLoop* loop, int revents )
-    {
-        if( expect_true( cb_ != NULL ) ) {
-            (*cb_)( revents);
-        }
-    }
-
-    tiny_forceinline void  ev_start( EventLoop* loop, int active )
-    {
-            active_ = active;
-            loop->addActiveCnt();
-
-    }
-
-    tiny_forceinline void  ev_stop( EventLoop* loop )
-    {
-        active_ = 0;
-        loop->delActiveCnt();
-    }
-
+    tiny_forceinline void   onEvent( EventLoop* loop, int revents );
+    /*tiny_forceinline*/ void   ev_start( EventLoop* loop, int active );
+    /*tiny_forceinline*/ void   ev_stop( EventLoop* loop );
     tiny_forceinline bool   isActive() const { return active_ > 0 ; }
     tiny_forceinline int    getActive() const { return active_; }
     tiny_forceinline void   setActive( int active ) { active_ =  active; }
@@ -83,13 +70,23 @@ public:
 protected:
     int         active_;
     int         pending_;
-    void*       data_
+    void*       data_;
     EVENT_CB    cb_;
 
 };
 
 class  EventList  : public IEvent
 {
+public:
+    EventList( EVENT_CB cb ) :IEvent(cb)
+    {
+
+    }
+    ~EventList()
+    {
+
+    }
+    tiny_forceinline    EventList**  getNext()   { return &this->next_;  }
 protected:
     EventList*  next_;
 };
@@ -98,6 +95,13 @@ class TimerEventList : public IEvent
 {
 public:
     TimerEventList( EVENT_CB cb , Timestamp after ) : IEvent( cb ), at_( after )
+    {
+
+    }
+    ~TimerEventList()
+    {
+
+    }
 public:
     Timestamp   getAt() const  { return at_; }
     TimerEventList** getNext() { return &next_; }
@@ -111,7 +115,7 @@ class EventIo : public EventList
 {
 
 public:
-    EventIo( EVENT_CB cb, int fd , int events ):IEvent( cb ), fd_( fd ),events_( events | EV_IOFDSET )
+    EventIo( EVENT_CB cb, int fd , int events ):EventList( cb ), fd_( fd ),events_( events | EV_IOFDSET )
     {
 
     }
@@ -121,39 +125,12 @@ public:
     }
 
     tiny_forceinline    int getFd()       const { return fd_;     }
-    tiny_forceinline    void setEvents( int flag ) { eventd_ = flag; }
+    tiny_forceinline    void setEvents( int flag ) { events_ = flag; }
     tiny_forceinline    int getEvents()   const { return events_; }
-    tiny_forceinline    EventIo**  getNext() const  { return &this->next_;  }
 
 public:
-    void start( EventLoop* loop_ )
-    {
-        if (expect_false( isActive() ) ){
-            return;
-        }
-
-        assert( fg_ > 0 );
-        assert( !(events_&~(EV_IOFDSET | EV_READ | EV_WRITE )))
-
-        ev_start( loop, 1 );
-
-        loop_->addActiveFdEvent( this );
-    }
-
-    void stop(EventLoop* loop )
-    {
-        loop_->delPendingEvent( this );
-
-        if ( expect_false( !isActive() ) ) {
-            return false ;
-        }
-
-        assert( fd > 0 );
-
-        loop_->delActiveFdEvent();
-
-        ev_stop( loop );
-    }
+    void start( EventLoop* loop );
+    void stop(EventLoop* loop );
 private:
     int     fd_;
     int     events_;
@@ -170,33 +147,8 @@ public:
 public:
     int  getRepeat() const { return repeat_; }
 public:
-    void start( EventLoop* loop )
-    {
-        if( isActive() ) {
-            return;
-        }
-
-        at_ += loop->getNowTime();
-
-        tiny_assert( repeat_ >= 0 );
-
-        ev_start( loop, loop->getTimerCount() + 1 );
-
-        loop->addTimer( this );
-
-    }
-
-    void stop( EventLoop* loop )
-    {
-        if( expect_false( !isActive() )){
-            return;
-        }
-
-        int active = getActive();
-        if( expect_true( active < loop->getTimerCount() +kHeap0 -1 ) ){
-            timers_[active] = timers_[ loop->getTimerCount() ]
-        }
-    }
+    void start( EventLoop* loop );
+    void stop( EventLoop* loop );
 private:
     int    repeat_;
 };

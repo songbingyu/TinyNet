@@ -8,14 +8,14 @@
 
 #include"IConnection.h"
 #include"TcpServer.h"
-#include"EventDelegate.h"
+#include"CallBackDelegate.h"
 #include"CircularBuffer.h"
 
 class EventLoop;
 
-typedef  EventDelegate<TcpServer, Connection, int >     ReadCallBack;
-typedef  EventDelegate<TcpServer, Connection, int >     WriteCallBack;
-typedef  EventDelegate<TcpServer, Connection, int >     CloseCallBack;
+typedef  CallBackDelegate<TcpServer, Connection, int >     ReadCallBack;
+typedef  CallBackDelegate<TcpServer, Connection, int >     WriteCallBack;
+typedef  CallBackDelegate<TcpServer, Connection, int >     CloseCallBack;
 
 enum ConnectionState
 {

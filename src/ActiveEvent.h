@@ -31,17 +31,16 @@ public:
 
     void delList( EventIo* ev )
     {
-        EventIo** head = &head_;
+        EventList** head = ( EventList**)&head_;
         while( *head ) {
 
             if( expect_true( *head == ev ) ){
                 *head = *ev->getNext();
             }
 
-            head = head->getNext();
+            head =(*head)->getNext();
         }
     }
-    void delList( EventIo** ev );
 
 public:
 
@@ -49,12 +48,16 @@ public:
     {
         EventIo* ev = NULL;
         while( (ev = head_ ) ){
-            ev->stop();
-            loop->addPendingEvent( (EventI))
+            ev->stop( loop );
+            loop->addPendingEvent( (IEvent*)ev, EV_ERROR | EV_WRITE | EV_READ );
         }
 
     }
 
+    tiny_forceinline void fdEvent( EventLoop* loop, int revents  )
+    {
+
+    }
 public:
     EventIo*        head_;
     int             events_;

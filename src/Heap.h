@@ -12,14 +12,14 @@
 namespace Tiny
 {
 
-    tiny_forceinline void  unHeap( HeapVec& heap, int k )
+    /*tiny_forceinline*/ void  upHeap( HeapVec& heap, int k )
     {
         TimerHeap*  he  = heap[k];
 
         for( ; ; )
         {
             int p = k >> 1;
-            if( p! || heap[p]->getAt() <= he->getAt() )
+            if( !p || heap[p]->getAt() <= he->getAt() )
             break;
 
             heap[k] = heap[p];
@@ -32,7 +32,7 @@ namespace Tiny
         he->setActive(k);
     }
 
-    tiny_forceinline  void downHeap( HeapVec& heap, int N, int k )
+    /*tiny_forceinline*/  void downHeap( HeapVec& heap, int N, int k )
     {
         TimerHeap* he = heap[k];
         for( ; ; )
@@ -41,7 +41,7 @@ namespace Tiny
 
             if( c >= N + 1 )
             break;
-            c += c + 1 <  N + 1 && heap[c]->getAt()  >  heap[c+1]->getAt() ? 1 : 0
+            c += c + 1 <  N + 1 && heap[c]->getAt()  >  heap[c+1]->getAt() ? 1 : 0;
 
             if( he->getAt()  < heap[c]->getAt() )
             break;

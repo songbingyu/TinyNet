@@ -11,17 +11,6 @@
 #include "EventLoop.h"
 #include "SocketHelper.h"
 
-//just for  add to epoll  state control
-enum EventState
-{
-    ES_New,
-    ES_Added,
-    ES_Del,
-};
-
-
-
-
 // you know Connection must be  not copy
 class IConnection: public nocopyable
 {
@@ -69,9 +58,9 @@ public:
     bool    isNoneEvent( )          {  return events_ == 0 ;                        }
 private:
     // add mod
-    void    updateEvent( )          { loop_->updateEvent( this );           }
+    void    updateEvent( )          { /*loop_->updateEvent( this );*/           }
     // del
-    void    delEvent( )             { loop_->delEvent( this );              }
+    void    delEvent( )             { /*loop_->delEvent( this );*/              }
 protected:
     int                 sockfd_;
     EventLoop*          loop_;

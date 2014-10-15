@@ -23,7 +23,7 @@ public:
 public:
     void clear()
     {
-        event_ = NULL:
+        event_ = NULL;
         eventFlag_ = 0;
     }
 public:

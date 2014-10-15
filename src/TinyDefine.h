@@ -7,6 +7,7 @@
 
 #include<sys/time.h>
 #include<sys/select.h>
+#include<assert.h>
 #include<vector>
 
 
@@ -15,8 +16,9 @@
 
 #define tiny_attribute(attrlist)      __attribute__(attrlist)
 
+#ifdef _TINY_OP_
 
-#define tiny_forceinline    tiny_attribute((__alwayes_inline__))
+#define tiny_forceinline    tiny_attribute((always_inline))
 #define tiny_noinline       tiny_attribute((__noinline__))
 
 #define tiny_pure           tiny_attribute((__pure__))
@@ -25,12 +27,26 @@
 #define tiny_hot            tiny_attribute((__hot__))
 #define tiny_cold           tiny_attribute((__cold__))
 
+#else
+
+#define tiny_forceinline
+#define tiny_noinline
+
+#define tiny_pure
+#define tiny_unused
+
+#define tiny_hot
+#define tiny_cold
+
+
+
+#endif
+
+
 typedef     double          Timestamp;
 
-typedef     TimerEventList  TimerHeap;
-typedef     std::vector< TimerHeap* >  HeapVec;
 
-typedef tiny_assert( expr )     assert( expr )
+#define  tiny_assert( expr )     assert( expr )
 
 #define MIN_TIMEJUMP    1.
 #define MAX_BLOCKTIME  59.743
@@ -46,22 +62,12 @@ enum EventState
 
 const static int kHeap0 = 1;
 
-Timestamp  tinyGetTime()
-{
-    struct timeval tv;
-    gettimeofday( &tv, 0 );
-    return tv.tvsec + tv.tvusec*1e-9;
-}
-
-void tinySleep( Timestamp delay )
-{
-    struct timeval tv;
-    tv.tv_sec = (long)t;
-    tv.tv_usec=(long)( ( t - tv.tv_sec ) * 1e6 );
-    select( 0, 0, 0, 0, &tv );
-}
+extern Timestamp  tinyGetTime();
+extern void tinySleep( Timestamp t );
 
 #endif
+
+
 
 
 

@@ -20,7 +20,7 @@ class PendingEvent;
 class IPoller;
 class PendingEvent;
 
-typedef std::vector<ActiveEvent*> ActiveEventVec;
+typedef std::vector<ActiveFdEvent*> ActiveEventVec;
 
 class  EventLoop: public nocopyable
 {
@@ -42,7 +42,7 @@ public:
      void delTimer( EventTimer* ev );
      void addFeedReverse( IEvent* ev );
      void feedReverseDone( int revents );
-     tiny_forceinline  ActiveFdEvent*  getActiveFdEventByFd( int fd );
+     ActiveFdEvent*  getActiveFdEventByFd( int fd );
      tiny_forceinline void addActiveCnt() { ++activeCnt_; }
      tiny_forceinline void delActiveCnt() { --activeCnt_; }
      tiny_forceinline Timestamp   getNowTime() const  { return curTime_; }

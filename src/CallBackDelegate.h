@@ -15,7 +15,7 @@ class  CallBackDelegate
 public:
     typedef   void  ( C::*Func  )( A1*  arg1, A2* arg2 );
 
-    EventDelegate( C*  inst, Func func ): inst_( inst ), func_( func )
+    CallBackDelegate( C*  inst, Func func ): inst_( inst ), func_( func )
     {
 
     }

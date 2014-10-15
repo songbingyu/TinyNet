@@ -159,7 +159,6 @@ void  EventEpoll::waitEvent( Timestamp ts )
                 continue;
             }
         }
-
         activeEv->fdEvent( loop_, got );
     }
 

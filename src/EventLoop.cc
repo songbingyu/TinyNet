@@ -35,7 +35,7 @@ int  EventLoop::run()
         {
             Timestamp   waitTime = 0.;
             Timestamp   prevNowTime =  curTime_;
-            Timestamp   sleepTime;
+            Timestamp   sleepTime=0.;
             updateTime( 1e100 );
 
             if( expect_true( getTimerCount() > 0 ) ) {
@@ -56,7 +56,7 @@ int  EventLoop::run()
                 }
 
                 if( expect_false( ioBlockTime_ ) ) {
-                    Timestamp sleepTime= ioBlockTime_ -( curTime_ - prevNowTime );
+                    sleepTime= ioBlockTime_ -( curTime_ - prevNowTime );
                     if( sleepTime > waitTime - poller_->getMinWaitTime() ){
                         sleepTime = waitTime = poller_->getMinWaitTime();
                     }
@@ -94,11 +94,11 @@ IPoller* EventLoop::getRecommendedPoller()
 void EventLoop::addPendingEvent( IEvent* ev, int evFlag )
 {
     if( expect_false( ev->getPending()) ) {
-        pendingEvents_[ ev->getPending()-1 ].eventFlag_ | = evFlag;
+        pendingEvents_[ ev->getPending()-1 ]->eventFlag_ |= evFlag;
     } else {
         PendingEvent* pe  = new PendingEvent( ev, evFlag );
-        pendingEvents_.push_back( pe )
-        ev->setPending( pendingEvents_.size() );
+        pendingEvents_.push_back( pe );
+        ev->setPending( (int)pendingEvents_.size() );
     }
 
 }
@@ -106,7 +106,7 @@ void EventLoop::addPendingEvent( IEvent* ev, int evFlag )
 void EventLoop::delPendingEvent( IEvent* ev )
 {
     if( ev->getPending() ) {
-        pendingEvents_[ev->getPending()-1].clear();
+        pendingEvents_[ev->getPending()-1]->clear();
         ev->setPending(0);
     }
 }
@@ -114,8 +114,8 @@ void EventLoop::delPendingEvent( IEvent* ev )
 void EventLoop::addActiveFdEvent(EventIo* ev )
 {
     int  cnt = ev->getFd() + 1;
-    if( cnt > activeFdEvents_.size() ) {
-        activeFdEvent_.resize( cnt, new ActiveFdEvent() );
+    if( cnt > (int)activeFdEvents_.size() ) {
+        activeFdEvents_.resize( cnt, new ActiveFdEvent() );
     }
 
     ActiveFdEvent* activeEv = activeFdEvents_[ ev->getFd() ];
@@ -130,7 +130,7 @@ void EventLoop::addActiveFdEvent(EventIo* ev )
 
 void EventLoop::delActiveFdEvent( EventIo* ev )
 {
-    ActiveFdEventI activeEv = activeFdEvents_[ ev->getFd() ];
+    ActiveFdEvent* activeEv = activeFdEvents_[ ev->getFd() ];
     activeEv->delList( ev );
     addChangeFd( ev->getFd(),EV_NO );
 }
@@ -139,7 +139,7 @@ void EventLoop::addTimer( EventTimer* ev )
 {
     timers_[ ev->getActive() ] = ( TimerEventList* )ev;
 
-    Tiny::unHeap( timers_, ev->getActive() );
+    Tiny::upHeap( timers_, ev->getActive() );
 }
 
 void  EventLoop::delTimer( EventTimer* ev )
@@ -147,7 +147,7 @@ void  EventLoop::delTimer( EventTimer* ev )
     if( expect_true( ev->getActive() < getTimerCount() + kHeap0 -1 ) ){
         timers_[ ev->getActive() ] = timers_[ getTimerCount() + kHeap0 -1 ];
         timers_.pop_back();
-        Tiny::adjustHeap( timers_. getTimerCount(), ev->getActive() );
+        Tiny::adjustHeap( timers_, getTimerCount(), ev->getActive() );
     }
 }
 
@@ -167,13 +167,15 @@ void EventLoop::feedReverseDone( int revents )
 
 bool EventLoop::addChangeFd( int fd, int flags )
 {
-    int refiy = activeFdEvents_[fd].refiy_;
+    int refiy = activeFdEvents_[fd]->refiy_;
 
-    activeFdEvent_[fd].refiy_ |= flags;
+    activeFdEvents_[fd]->refiy_ |= flags;
 
     if( expect_true( !refiy ) ) {
         changeFds_.push_back( fd );
     }
+
+    return true;
 }
 
 void EventLoop::fdReify()
@@ -188,7 +190,7 @@ void EventLoop::fdReify()
         ev->events_ = 0;
         ev->refiy_  = 0;
 
-        for ( EventIo* e = ev->head_; e !=NULL; e = e->next_ ){
+        for ( EventIo* e = ev->head_; e !=NULL; e = (EventIo*)*(e->getNext()) ){
             ev->events_ |= e->getEvents();
         }
 
@@ -196,7 +198,7 @@ void EventLoop::fdReify()
             oReify = EV_IOFDSET;
         }
 
-        if( OReify & EV_IOFDSET ) {
+        if( oReify & EV_IOFDSET ) {
             poller_->updateEvent( fd, oEvents, ev->events_ );
         }
 
@@ -210,7 +212,7 @@ ActiveFdEvent* EventLoop::getActiveFdEventByFd( int fd ) {
 
 void  EventLoop::updateTime( Timestamp maxBlockTime )
 {
-    nowTime = tinyGetTime();
+    Timestamp nowTime = tinyGetTime();
     if( expect_false( curTime_ > nowTime  || nowTime > curTime_ + maxBlockTime + MIN_TIMEJUMP ) ){
 
     }

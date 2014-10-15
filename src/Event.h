@@ -9,7 +9,7 @@
 #include "TinyDefine.h"
 #include "CallBackDelegate.h"
 #include "EventLoop.h"
-#inclide "Log.h"
+#include "Log.h"
 
 typedef     void (*EV_CB)( EventLoop* loop,int revents );
 

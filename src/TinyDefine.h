@@ -7,6 +7,7 @@
 
 #include<sys/time.h>
 #include<sys/select.h>
+#include<vector>
 
 
 #define expect_true(x)      __builtin_expect((x),1)
@@ -49,7 +50,7 @@ Timestamp  tinyGetTime()
 {
     struct timeval tv;
     gettimeofday( &tv, 0 );
-    return ts.tvsec + ts.tvusec*1e-9;
+    return tv.tvsec + tv.tvusec*1e-9;
 }
 
 void tinySleep( Timestamp delay )

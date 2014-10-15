@@ -6,8 +6,9 @@
 #include "EventLoop.h"
 #include <sys/epoll.h>
 #include "Log.h"
+#include "Heap.h"
 #include "ActiveEvent.h"
-//#include "IConnection.h"
+#include "PendingEvent.h"
 
 EventLoop::EventLoop(): isRuning_( true ), curPid_(0)
 {
@@ -32,13 +33,13 @@ int  EventLoop::run()
 
         //time
         {
-            Timestamp   waitTime = 0.
+            Timestamp   waitTime = 0.;
             Timestamp   prevNowTime =  curTime_;
-
+            Timestamp   sleepTime;
             updateTime( 1e100 );
 
             if( expect_true( getTimerCount() > 0 ) ) {
-                waitEvent = MAX_BLOCKTIME;
+                waitTime = MAX_BLOCKTIME;
 
                 if( !activeFdEvents_.empty() )
                 {
@@ -47,7 +48,7 @@ int  EventLoop::run()
                 }
 
                 if( expect_false( waitTime < 0. ) ){
-                    waitTime = 0.
+                    waitTime = 0.;
                 }
 
                 if( expect_false( waitTime < poller_->getMinWaitTime() ) ){
@@ -68,63 +69,19 @@ int  EventLoop::run()
 
             }
 
-            poller_->updateEvent( waitTime );
+            poller_->waitEvent( waitTime );
 
             updateTime( waitTime + sleepTime );
 
+            timersReify();
 
-
+            invokePending();
 
 
         }
     }while( isRuning_ );
 
-    while( isRuning_ ){
-
-        activeConnections_.clear();
-        //Fixme: what time ?
-        eventEpoll_.waitEvent( 10, &activeConnections_ );
-
-        ConnectionVec::iterator it = activeConnections_.begin();
-
-        for( ; it != activeConnections_.end(); ++it )
-        {
-            IConnection* conn = *it;
-            if( NULL != conn )
-            {
-                // begin
-                int revents = conn->getReadEvents();
-                if( ( revents & EPOLLHUP) && !( revents& EPOLLIN )  )
-                {
-                     conn->onClose();
-                }
-
-                if( revents & ( EPOLLERR ) )
-                {
-                    conn->onError();
-                }
-
-                if( revents & ( EPOLLIN | EPOLLPRI | EPOLLRDHUP ))
-                {
-                    conn->onRead();
-                }
-
-                if( revents &  EPOLLOUT )
-                {
-                    conn->onWrite();
-                }
-
-            }
-            else
-            {
-                //TODO should do what?
-                LOG_ERROR( " connection is null " );
-            }
-
-        }
-    }
-
-    return 1;
+   return  1;
 
 }
 
@@ -180,23 +137,42 @@ void EventLoop::delActiveFdEvent( EventIo* ev )
 
 void EventLoop::addTimer( EventTimer* ev )
 {
-   timers_[ ev->getActive() ] = ( TimerEventList* )ev;
+    timers_[ ev->getActive() ] = ( TimerEventList* )ev;
 
+    Tiny::unHeap( timers_, ev->getActive() );
 }
 
 void  EventLoop::delTimer( EventTimer* ev )
 {
-
+    if( expect_true( ev->getActive() < getTimerCount() + kHeap0 -1 ) ){
+        timers_[ ev->getActive() ] = timers_[ getTimerCount() + kHeap0 -1 ];
+        timers_.pop_back();
+        Tiny::adjustHeap( timers_. getTimerCount(), ev->getActive() );
+    }
 }
 
-void EventLoop::addChangetFd( int fd, int flag )
+void EventLoop::addFeedReverse( IEvent* ev )
+{
+    rFeeds_.push_back( ev );
+}
+
+void EventLoop::feedReverseDone( int revents )
+{
+    int  size = (int)rFeeds_.size();
+    for( int i=0; i < size; ++i ){
+        addPendingEvent( rFeeds_[i], revents );
+    }
+    rFeeds_.clear();
+}
+
+bool EventLoop::addChangeFd( int fd, int flags )
 {
     int refiy = activeFdEvents_[fd].refiy_;
 
-    activeFdEvent_[fd].refiy_ |= flag;
+    activeFdEvent_[fd].refiy_ |= flags;
 
     if( expect_true( !refiy ) ) {
-        changeFds_.push_back( fd )
+        changeFds_.push_back( fd );
     }
 }
 
@@ -250,9 +226,40 @@ void EventLoop::timerReSchedule( Timestamp adjust )
     }
 }
 
+void EventLoop::timersReify()
+{
+    if( getTimerCount() && timers_[kHeap0]->getAt() < curTime_ ){
+        do
+        {
+            EventTimer* ev = ( EventTimer* )timers_[kHeap0];
 
+            if( ev->getRepeat() ){
+                ev->setAt( ev->getAt() + ev->getRepeat() );
+                if( ev->getAt() < curTime_ ){
+                    ev->setAt( curTime_ );
 
+                    Tiny::downHeap( timers_, getTimerCount(), kHeap0 );
+                } else {
+                    ev->stop( this );
+                }
 
+                addFeedReverse( (IEvent*)ev );
+            }
+        }while( getTimerCount() && timers_[kHeap0]->getAt() < curTime_ );
+
+        feedReverseDone( EV_TIMER );
+    }
+}
+
+void EventLoop::invokePending( )
+{
+    int size = pendingEvents_.size();
+    for( int i=0; i < size; ++i ){
+        PendingEvent* pe = pendingEvents_[i];
+        pe->event_->setPending( 0 );
+        pe->event_->onEvent( this, pe->eventFlag_ );
+    }
+}
 
 
 

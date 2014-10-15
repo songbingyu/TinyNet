@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "nocopyable.h"
+#include "TinyDefine.h"
 #include "EventEpoll.h"
 #include "Event.h"
 
@@ -17,6 +18,7 @@ class ActiveFdEvent;
 class IConnections;
 class PendingEvent;
 class IPoller;
+class PendingEvent;
 
 typedef std::vector<ActiveEvent*> ActiveEventVec;
 
@@ -36,8 +38,8 @@ public:
      void delPendingEvent(IEvent* ev );
      void addActiveFdEvent ( EventIo* ev );
      void delActiveFdEvent ( EventIo* ev );
-     void addTimer( EventTimer ev );
-     void delTimer( EventTimer ev );
+     void addTimer( EventTimer* ev );
+     void delTimer( EventTimer* ev );
      void addFeedReverse( IEvent* ev );
      void feedReverseDone( int revents );
      tiny_forceinline  ActiveFdEvent*  getActiveFdEventByFd( int fd );
@@ -60,7 +62,7 @@ private:
     PendingArr          pendingEvents_;
     bool                isRuning_;
     IPoller*            poller_;
-    typedef std::vectori<ActiveFdEvent*>  ActiveFdArr;
+    typedef std::vector<ActiveFdEvent*>  ActiveFdArr;
     ActiveFdArr         activeFdEvents_;
     typedef std::vector<int>            ChangeFdArr;
     ChangeFdArr         changeFds_;

@@ -7,8 +7,10 @@
 #define _ACTIVE_EVENT_H_
 
 #include "TinyDefine.h"
-#include "Event.h"
-#include "EventLoop.h"
+
+class EventIo;
+class EventList;
+class EventLoop;
 
 
 class ActiveFdEvent
@@ -23,45 +25,10 @@ public:
 
     }
 public:
-    void addList( EventIo* ev )
-    {
-        *ev->getNext() = head_;
-        head_ = ev;
-    }
-
-    void delList( EventIo* ev )
-    {
-        EventList** head = ( EventList**)&head_;
-        while( *head ) {
-
-            if( expect_true( *head == ev ) ){
-                *head = *ev->getNext();
-            }
-
-            head =(*head)->getNext();
-        }
-    }
-
-public:
-
-    tiny_forceinline  void  tiny_cold  killFd( EventLoop* loop )
-    {
-        EventIo* ev = NULL;
-        while( (ev = head_ ) ){
-            ev->stop( loop );
-            loop->addPendingEvent( (IEvent*)ev, EV_ERROR | EV_WRITE | EV_READ );
-        }
-
-    }
-
-    tiny_forceinline void fdEvent( EventLoop* loop, int revents  )
-    {
-        EventIo* head = head_;
-        for( ; head != NULL; head = *head->getNext() ){
-            loop_->addPendingEvent( (IEvent*)head , revents );
-        }
-
-    }
+    void addList( EventIo* ev );
+    void delList( EventIo* ev );
+    tiny_forceinline  void  tiny_cold  killFd( EventLoop* loop );
+    tiny_forceinline void fdEvent( EventLoop* loop, int revents  );
 public:
     EventIo*        head_;
     int             events_;
@@ -82,37 +49,14 @@ public:
 
     }
 public:
-    tiny_forceinline void addList( EventList* el )
-    {
-        *el->getNext() = head_;
-         head_ = el;
-    }
-
-    tiny_forceinline void delList( EventList* el )
-    {
-        EventList** head = ( EventList**)&head_;
-        while( *head ) {
-            if( expect_true( *head == el )){
-                *head = *el->getNext();
-                break;
-            }
-
-            head = (*head)->getNext();
-        }
-    }
-
-    tiny_forceinline void addFeedEvent()
-    {
-        EventList* head = head_;
-        for( ; head != NULL; head = *head->getNext() ){
-            loop_->addPendingEvent( (IEvent*)head , EV_SIGNAL );
-        }
-    }
+    tiny_forceinline void addList( EventList* el );
+    tiny_forceinline void delList( EventList* el );
+    tiny_forceinline void addFeedEvent();
 public:
     EventList*  head_;
     EventLoop*  loop_;
     int         pending_;
-}
+};
 
 
 #endif

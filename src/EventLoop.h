@@ -23,6 +23,8 @@ class PendingEvent;
 
 typedef std::vector<ActiveFdEvent*> ActiveEventVec;
 
+//using namespace Tiny;
+
 class  EventLoop: public nocopyable
 {
 public :

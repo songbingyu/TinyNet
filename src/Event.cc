@@ -11,7 +11,7 @@
 void IEvent:: onEvent( EventLoop* loop, int revents )
 {
     if( expect_true( cb_ != NULL ) ) {
-        (*cb_)( revents);
+        (*cb_)( loop, this,  revents);
     }
 }
 

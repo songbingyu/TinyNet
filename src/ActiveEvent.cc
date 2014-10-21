@@ -3,6 +3,8 @@
     I believe  Spring brother
  */
 #include "ActiveEvent.h"
+#include "Event.h"
+#include "EventLoop.h"
 
 void ActiveFdEvent::addList( EventIo* ev )
 {

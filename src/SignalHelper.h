@@ -7,11 +7,12 @@
 
 #include <map>
 #include "TinyDefine.h"
-#include "Event.h"
+
 #include "ActiveEvent.h"
 
-class EventLoop;
-
+class IEvent;
+class EventIo;
+class EventSignal;
 
 namespace Tiny
 {
@@ -41,10 +42,9 @@ namespace Tiny
             EventIo*     ev_;
             EventLoop*   loop_;
             int          evPipe_[2];
-
     };
 
-}
+}//namespace Tiny
 
 
 #endif //_SIGNAL_HELPER_H_

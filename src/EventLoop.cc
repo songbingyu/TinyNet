@@ -153,13 +153,12 @@ void  EventLoop::delTimer( EventTimer* ev )
 
 void EventLoop::addSignalEvent( EventSignal* es )
 {
-    signalHelper_.addSignal();
-
+    signalHelper_.addSignal( es );
 }
 
 void EventLoop::delSignalEvent( EventSignal* es )
 {
-
+    signalHelper_.delSignal( es );
 }
 
 void EventLoop::addFeedSignal( int sigNum )

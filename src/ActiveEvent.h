@@ -56,6 +56,10 @@ public:
 
     tiny_forceinline void fdEvent( EventLoop* loop, int revents  )
     {
+        EventIo* head = head_;
+        for( ; head != NULL; head = *head->getNext() ){
+            loop_->addPendingEvent( (IEvent*)head , revents );
+        }
 
     }
 public:
@@ -94,6 +98,14 @@ public:
             }
 
             head = (*head)->getNext();
+        }
+    }
+
+    tiny_forceinline void addFeedEvent()
+    {
+        EventList* head = head_;
+        for( ; head != NULL; head = *head->getNext() ){
+            loop_->addPendingEvent( (IEvent*)head , EV_SIGNAL );
         }
     }
 public:

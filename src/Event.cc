@@ -93,7 +93,7 @@ void EventSignal::start( EventLoop* loop )
     tiny_assert( sigNum_ > 0 );
     ev_start( loop, 1 );
 
-    loop->addSignal( this );
+    loop->addSignalEvent( this );
 
     struct sigaction sa;
 
@@ -104,17 +104,20 @@ void EventSignal::start( EventLoop* loop )
 
     sigaction( sigNum_, &sa, 0 );
 
-
-
-
-
-
-
 }
 
 void EventSignal::stop( EventLoop* loop )
 {
+    loop->delPendingEvent( (IEvent*)this );
+    if( expect_false( !isActive() ) ){
+        return;
+    }
 
+    loop->delSignalEvent( this );
+
+    ev_stop( loop );
+
+    signal( sigNum_, SIG_DFL );
 }
 
 

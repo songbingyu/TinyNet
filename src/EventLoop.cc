@@ -10,7 +10,7 @@
 #include "ActiveEvent.h"
 #include "PendingEvent.h"
 
-EventLoop::EventLoop(): isRuning_( true ), curPid_(0)
+EventLoop::EventLoop(): isRuning_( true ), curPid_(0), signalHelper_(this)
 {
     poller_ = getRecommendedPoller();
 
@@ -149,6 +149,32 @@ void  EventLoop::delTimer( EventTimer* ev )
         timers_.pop_back();
         Tiny::adjustHeap( timers_, getTimerCount(), ev->getActive() );
     }
+}
+
+void EventLoop::addSignalEvent( EventSignal* es )
+{
+    signalHelper_.addSignal();
+
+}
+
+void EventLoop::delSignalEvent( EventSignal* es )
+{
+
+}
+
+void EventLoop::addFeedSignal( int sigNum )
+{
+   ActiveSignalEvent& es = Tiny::sigMaps[ sigNum ];
+
+   es.pending_ = 1;
+
+   signalHelper_.pipeWrite();
+
+}
+
+void EventLoop::onSignalEvent()
+{
+    signalHelper_.onSignalEvent();
 }
 
 void EventLoop::addFeedReverse( IEvent* ev )

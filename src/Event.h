@@ -42,8 +42,8 @@ enum
 };
 
 // all event base
-
-typedef  void (*EVENT_CB)(EventLoop* loop, int revents_);
+class IEvent;
+typedef  void (*EVENT_CB)(EventLoop* loop, IEvent* ev,  int revents_);
 
 class IEvent
 {

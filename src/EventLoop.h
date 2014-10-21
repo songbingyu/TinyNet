@@ -13,6 +13,7 @@
 #include "TinyDefine.h"
 #include "EventEpoll.h"
 #include "Event.h"
+#include "SignalHelper.h"
 
 class ActiveFdEvent;
 class IConnections;
@@ -40,8 +41,10 @@ public:
      void delActiveFdEvent ( EventIo* ev );
      void addTimer( EventTimer* ev );
      void delTimer( EventTimer* ev );
-     void addSignal( EventSignal* es );
-     void delSignal( EventSignal* es );
+     void addSignalEvent( EventSignal* es );
+     void delSignalEvent( EventSignal* es );
+     void addFeedSignal( int sigNum );
+     void onSignalEvent();
      void addFeedReverse( IEvent* ev );
      void feedReverseDone( int revents );
      ActiveFdEvent*  getActiveFdEventByFd( int fd );
@@ -75,6 +78,7 @@ private:
     ReverseArr          rFeeds_;
     Timestamp           curTime_;
     Timestamp           ioBlockTime_;
+    Tiny::SignalHelper  signalHelper_;
 };
 
 

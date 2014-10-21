@@ -6,7 +6,7 @@
 #include"TinyDefine.h"
 #include<sys/time.h>
 #include<sys/select.h>
-
+#include<fcntl.h>
 
 
 Timestamp  tinyGetTime()
@@ -22,6 +22,13 @@ void tinySleep( Timestamp t )
     tv.tv_sec = (long)t;
     tv.tv_usec=(long)( ( t - tv.tv_sec ) * 1e6 );
     select( 0, 0, 0, 0, &tv );
+}
+
+
+void fdInteral( int fd )
+{
+    fcntl( fd, F_SETFD, FD_CLOEXEC );
+    fcntl( fd, F_SETFL, O_NONBLOCK );
 }
 
 

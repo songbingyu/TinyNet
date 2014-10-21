@@ -4,6 +4,8 @@
  */
 
 #include "Event.h"
+#include <signal.h>
+#include "SignalHelper.h"
 #include "EventLoop.h"
 
 void IEvent:: onEvent( EventLoop* loop, int revents )
@@ -82,5 +84,37 @@ void EventTimer::stop( EventLoop* loop )
     ev_stop( loop );
 }
 
+void EventSignal::start( EventLoop* loop )
+{
+    if( isActive() ){
+        return;
+    }
+
+    tiny_assert( sigNum_ > 0 );
+    ev_start( loop, 1 );
+
+    loop->addSignal( this );
+
+    struct sigaction sa;
+
+    sa.sa_handler = Tiny::sigHandle;
+    sigfillset( &sa.sa_mask );
+
+    sa.sa_flags = SA_RESTART;
+
+    sigaction( sigNum_, &sa, 0 );
+
+
+
+
+
+
+
+}
+
+void EventSignal::stop( EventLoop* loop )
+{
+
+}
 
 

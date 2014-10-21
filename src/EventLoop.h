@@ -40,6 +40,8 @@ public:
      void delActiveFdEvent ( EventIo* ev );
      void addTimer( EventTimer* ev );
      void delTimer( EventTimer* ev );
+     void addSignal( EventSignal* es );
+     void delSignal( EventSignal* es );
      void addFeedReverse( IEvent* ev );
      void feedReverseDone( int revents );
      ActiveFdEvent*  getActiveFdEventByFd( int fd );

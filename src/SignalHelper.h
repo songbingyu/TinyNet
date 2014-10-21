@@ -5,17 +5,44 @@
 #ifndef _SIGNAL_HELPER_H_
 #define _SIGNAL_HELPER_H_
 
-class SignalHelper
+#include <map>
+#include "TinyDefine.h"
+#include "Event.h"
+#include "ActiveEvent.h"
+
+class EventLoop;
+
+
+namespace Tiny
 {
-public:
-    SignalHelper();
-    ~SignalHelper();
-public:
 
-private:
+    typedef std::map<int,ActiveSignalEvent>  SigMap;
+    SigMap        sigMaps;
 
 
-};
+    extern void addSignal( EventSignal* es );
+    extern void delSignal( EventSignal* es );
+    extern void addFeedSignal( int sigNum );
+
+    extern void sigHandle( int sigNum );
+
+    extern void pipeEventCb( EventLoop* loop, int revents );
+
+    class SignalHelper
+    {
+        public:
+            SignalHelper();
+            ~SignalHelper();
+        public:
+            void init();
+        private:
+            EventIo*     ev_;
+            EventLoop*   loop_;
+            int          evPipe_[2];
+
+    };
+
+}
 
 
 #endif //_SIGNAL_HELPER_H_

@@ -25,8 +25,8 @@ public:
 public:
     void addList( EventIo* ev )
     {
+        *ev->getNext() = head_;
         head_ = ev;
-        *(ev->getNext()) = ev;
     }
 
     void delList( EventIo* ev )
@@ -65,6 +65,42 @@ public:
     int             revents_;
     unsigned int    egen_;
 };
+
+class ActiveSignalEvent
+{
+public:
+    ActiveSignalEvent(): head_(NULL), loop_(NULL), pending_(0)
+    {
+
+    }
+    ~ActiveSignalEvent()
+    {
+
+    }
+public:
+    tiny_forceinline void addList( EventList* el )
+    {
+        *el->getNext() = head_;
+         head_ = el;
+    }
+
+    tiny_forceinline void delList( EventList* el )
+    {
+        EventList** head = ( EventList**)&head_;
+        while( *head ) {
+            if( expect_true( *head == el )){
+                *head = *el->getNext();
+                break;
+            }
+
+            head = (*head)->getNext();
+        }
+    }
+public:
+    EventList*  head_;
+    EventLoop*  loop_;
+    int         pending_;
+}
 
 
 #endif

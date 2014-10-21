@@ -43,12 +43,12 @@ enum
 
 // all event base
 
-typedef  void (*EVENT_CB)(int revents_);
+typedef  void (*EVENT_CB)(EventLoop* loop, int revents_);
 
 class IEvent
 {
 public:
-    IEvent(EVENT_CB cb ): cb_(cb){ }
+    IEvent(EVENT_CB cb ):active_(0),pending_(0),data_(NULL),cb_(cb){ }
     ~IEvent() { }
 protected:
     void  init()
@@ -163,8 +163,24 @@ public:
 
 class EventSignal : public EventList
 {
-public :
-    int signum_;
+public:
+    EventSignal( EVENT_CB cb, int sigNum ):EventList( cb ),sigNum_(sigNum)
+    {
+
+    }
+    ~EventSignal()
+    {
+
+    }
+public:
+    tiny_forceinline    void setSigNum( int sigNum ) { sigNum_ = sigNum; }
+    tiny_forceinline    int  getSigNum() const       { return sigNum_;   }
+
+    void start( EventLoop* loop );
+    void stop ( EventLoop* loop  );
+
+private:
+    int sigNum_;
 };
 
 

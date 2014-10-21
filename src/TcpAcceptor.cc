@@ -56,6 +56,8 @@ int TcpAcceptor::bindAndListen( )
 
     isListening_ = true;
 
+    ev_.start( loop_ );
+
     return  1;
 }
 

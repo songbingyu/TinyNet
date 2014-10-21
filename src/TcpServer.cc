@@ -111,6 +111,7 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
     connectionList_.push_back( conn );
 
     conn->onConnFinish();
+
     onConnection( conn );
 
     return ;

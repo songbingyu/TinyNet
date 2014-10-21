@@ -83,7 +83,8 @@ int   Connection::onError( )
 int  Connection::onConnFinish()
 {
     state_ = CS_Connected;
-    enableRead();
+    ev_.start( loop_ );
+    onConnFinish();
     return 1;
 }
 
@@ -105,7 +106,6 @@ void Connection::onEvents( EventLoop* loop, IEvent* ev, int revents )
         }else {
 
             LOG_ERROR("conn :%d unknow event:%d ", conn->getSockFd(),revents );
-
         }
     }
 }

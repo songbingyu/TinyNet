@@ -4,17 +4,20 @@
  */
 
 
+#include "TcpAcceptor.h"
 #include <assert.h>
 #include <netinet/in.h>
-#include "EventLoop.h"
+#include "TinyDefine.h"
 #include "Log.h"
+#include "Log.h"
+#include "EventLoop.h"
 #include "TcpServer.h"
 #include "Connection.h"
-#include "TcpAcceptor.h"
+#include "Event.h"
 
 
 
-TcpAcceptor::TcpAcceptor( int fd, EventLoop* loop, struct sockaddr_in&  addr ): IConnection( fd, loop, addr )
+TcpAcceptor::TcpAcceptor( int fd, EventLoop* loop, struct sockaddr_in&  addr ): IConnection( fd, loop ),ev_(TcpAcceptor::onEvents, fd, EV_READ )
 {
 
     bindAndListen();
@@ -61,7 +64,6 @@ int TcpAcceptor::bindAndListen( )
 int  TcpAcceptor::onRead( )
 {
      assert( socketHelper_ != NULL  );
-
      struct sockaddr_in addr ;
      int newfd = socketHelper_->accept( sockfd_, &addr );
      if( newfd  >= 0 )
@@ -73,9 +75,20 @@ int  TcpAcceptor::onRead( )
      }
      else
      {
-         //LOG_ERROR(" connect socket faial " );
+         LOG_ERROR("Acceptor accpet new conn fail:%d ", errno  );
      }
 
      return 1;
 }
+
+void TcpAcceptor::onEvents( EventLoop* loop, IEvent* ev, int revents_ )
+{
+    TcpAcceptor* acceptor = (TcpAcceptor*)ev->getUserData();
+    if( revents_&EV_READ ){
+        acceptor->onRead();
+    }else {
+        LOG_ERROR("EventIo receieve event:%d not EV_READ ");
+    }
+}
+
 

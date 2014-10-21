@@ -6,10 +6,11 @@
 #ifndef _CONNECTION_H_
 #define _CONNECTION_H_
 
-#include"IConnection.h"
-#include"TcpServer.h"
-#include"CallBackDelegate.h"
-#include"CircularBuffer.h"
+#include "TinyDefine.h"
+#include "IConnection.h"
+#include "TcpServer.h"
+#include "CallBackDelegate.h"
+#include "CircularBuffer.h"
 
 class EventLoop;
 
@@ -33,21 +34,23 @@ public:
     Connection( int fd,  EventLoop* loop, struct sockaddr_in& addr  );
     ~Connection();
 public:
-    virtual int  onRead ( );
-    virtual int  onWrite( );
-    virtual int  onClose( );
-    virtual int  onError( );
-    int          onConnFinish( );
+    int     onRead ( );
+    int     onWrite( );
+    int     onClose( );
+    int     onError( );
+    int     onConnFinish( );
+public:
+    static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 public:
     void         setReadCallBack ( ReadCallBack*  cb ) { readCallback_  = cb; }
     void         setWriteCallBack( WriteCallBack* cb ) { writeCallback_ = cb; }
     void         setCloseCallBack( CloseCallBack* cb ) { closeCallBack_ = cb; }
 private:
     ConnectionState  state_;
-    //NewConnectionCallBack
     ReadCallBack*           readCallback_;
     WriteCallBack*          writeCallback_;
     CloseCallBack*          closeCallBack_;
+    EventIo                 ev_;
 
     static const size_t  c_BufSize = 1024*4;
     CircularBuffer<char, c_BufSize>    readBuf_;
@@ -55,6 +58,7 @@ private:
 };
 
 #endif // _CONNECTION_H_
+
 
 
 

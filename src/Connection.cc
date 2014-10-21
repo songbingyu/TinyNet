@@ -3,15 +3,15 @@
     I believe  Spring brother
  */
 
-#include<stddef.h>
+#include <stddef.h>
 #include <netinet/in.h>
-#include"Log.h"
-#include"EventLoop.h"
-#include"Connection.h"
+#include "Log.h"
+#include "EventLoop.h"
+#include "Connection.h"
 
 
-Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IConnection( fd, loop, addr ),
-                                                                             state_( CS_No )
+Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IConnection( fd, loop ),
+                                                                        ev_(Connection::onEvents, fd, EV_READ )
 {
 
 }
@@ -35,7 +35,6 @@ int  Connection::onRead( )
 {
 
     //read shoule do what?
-
     int ret = readBuf_.push(socketHelper_, sockfd_ );
     if( ret < 0  )
     {
@@ -88,3 +87,25 @@ int  Connection::onConnFinish()
     return 1;
 }
 
+void Connection::onEvents( EventLoop* loop, IEvent* ev, int revents )
+{
+    Connection* conn = (Connection*)ev->getUserData();
+    if( NULL != conn ){
+        if( revents&EV_READ  ){
+
+            conn->onRead();
+
+        }else if( revents&EV_WRITE ){
+
+            conn->onWrite();
+
+        }else if( revents&EV_ERROR ){
+
+            conn->onError();
+        }else {
+
+            LOG_ERROR("conn :%d unknow event:%d ", conn->getSockFd(),revents );
+
+        }
+    }
+}

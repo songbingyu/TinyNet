@@ -16,33 +16,21 @@ class IConnection: public nocopyable
 {
 
 public:
-    IConnection( int fd, EventLoop* loop, struct sockaddr_in&  localaddr ): sockfd_( fd ),
-                                                                            loop_( loop ),
-                                                                            localAddr_( localaddr ),
-                                                                            eventState_( ES_New )
+    IConnection( int fd, EventLoop* loop ): sockfd_( fd ),loop_( loop )
     {
         socketHelper_ = new SocketHelper();
 
     }
+
     ~IConnection( )
     {
         //Fixme: should close socket ?
-
-        eventState_ = ES_Del;
         socketHelper_->close( sockfd_ );
         sockfd_ = -1;
-        loop_ = NULL;
-
+        loop_   = NULL;
         delete socketHelper_;
         socketHelper_ =  NULL;
-
     }
-
-public:
-    virtual int  onRead( ) {  return 1; }
-    virtual int  onWrite( ){  return 1; }
-    virtual int  onClose( ){  return 1; }
-    virtual int  onError( ){  return 1; }
 
 public:
     int     getSockFd( ) const      { return sockfd_ ;    }
@@ -52,8 +40,6 @@ public:
     int     getReadEvents( ) const  { return readEvents_; }
     void    enableRead( )           { events_ |= ( EPOLLIN | EPOLLPRI ); updateEvent();  }
     void    enableWrite( )          { events_ |=  EPOLLOUT;              updateEvent();  }
-    void    setEventState( EventState state ) {  eventState_ = state; }
-    EventState  getEventState() const { return eventState_; }
     void    removeEvent( )          { events_ = 0 ; delEvent();             }
     bool    isNoneEvent( )          {  return events_ == 0 ;                        }
 private:
@@ -64,15 +50,13 @@ private:
 protected:
     int                 sockfd_;
     EventLoop*          loop_;
-    struct sockaddr_in  localAddr_;
     SocketHelper*       socketHelper_;
-    //struct sockaddr_in  peerAddr_;
     int                 events_;
     int                 readEvents_;
-    EventState    eventState_;
 };
 
 #endif // _ICONNECTION_H_
+
 
 
 

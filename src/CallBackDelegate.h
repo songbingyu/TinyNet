@@ -6,6 +6,7 @@
 #ifndef _CALLBACKDELEGATE_H_
 #define _CALLBACKDELEGATE_H_
 
+#include<stddef.h>
 
 struct sockaddr_in;
 

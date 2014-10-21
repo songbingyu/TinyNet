@@ -45,6 +45,30 @@
 
 typedef     double          Timestamp;
 
+enum  EventIOType
+{
+    kIOSelect,
+    kIOPoll,
+    kIOEpoll,
+    kIOKQueue,
+    // cur just 4 , consider add  devpoll port
+};
+
+enum
+{
+    EV_NO       =   0x00000000,
+    EV_READ     =   0x00000001,
+    EV_WRITE    =   0x00000002,
+    EV_IOFDSET  =   0x00000080, //only interal use
+    EV_TIMER    =   0x00000100,
+    EV_PERIODIC =   0x00000200,
+    EV_SIGNAL   =   0x00000400,
+    EV_IDLE     =   0x00001000,
+    EV_ERROR    =   0x80000000,
+};
+
+
+
 
 #define  tiny_assert( expr )     assert( expr )
 

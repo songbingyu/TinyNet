@@ -166,7 +166,7 @@ int SocketHelper::setKeepAlive( int fd, bool isOpen )
 }
 
 
-int setSocketOpt( int fd, int optname, int& optval )
+int SocketHelper::setSocketOpt( int fd, int optname, int& optval )
 {
     return setsockopt( fd, SOL_SOCKET, optname, &optval, sizeof( optval ));
 }

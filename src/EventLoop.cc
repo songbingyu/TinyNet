@@ -286,6 +286,8 @@ void EventLoop::invokePending( )
         pe->event_->setPending( 0 );
         pe->event_->onEvent( this, pe->eventFlag_ );
     }
+
+    pendingEvents_.clear();
 }
 
 

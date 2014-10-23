@@ -31,14 +31,18 @@ enum ConnectionState
 class Connection : public IConnection
 {
 public:
-    Connection( int fd,  EventLoop* loop, struct sockaddr_in& addr  );
+    Connection( int fd,  EventLoop* loop );
     ~Connection();
 public:
-    int     onRead ( );
-    int     onWrite( );
-    int     onClose( );
-    int     onError( );
-    int     onConnFinish( );
+    int     onRead ();
+    int     onWrite();
+    int     onClose();
+    int     onError();
+    int     onConnFinish();
+    int     onConnDestory();
+public:
+    void    send( char* data, int len );
+    void    close();
 public:
     static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 public:

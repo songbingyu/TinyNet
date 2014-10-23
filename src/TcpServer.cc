@@ -103,7 +103,7 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
     assert( NULL == addr );
 #endif
 
-    Connection* conn  = new Connection( *fd, loop_ ,*addr );
+    Connection* conn  = new Connection( *fd, loop_ );
 
     conn->setReadCallBack(  new ReadCallBack( this, &TcpServer::onRead ) );
     conn->setWriteCallBack( new WriteCallBack( this, &TcpServer::onWrite ));

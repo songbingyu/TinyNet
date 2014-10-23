@@ -12,6 +12,7 @@
 class EventLoop;
 class Connector;
 class Connection;
+struct sockaddr_in;
 
 class    TcpClient
 {
@@ -23,7 +24,8 @@ public:
     void connect();
     void stop();
     void disconnect();
-    void onNewConn( int fd, void* data );
+    void onNewConn( int* fd, struct sockaddr_in* addr  );
+    void onConn();
     void onRead( Connection* conn, int* data );
     void onWrite( Connection* conn, int* data );
     void onClose( Connection* conn, int* data );

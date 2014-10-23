@@ -20,7 +20,9 @@ TcpClient::TcpClient( const char* ip, int port ): serverIp_( ip ), serverPort_( 
 
 TcpClient::~TcpClient()
 {
-
+    TINY_DELETE( connector_ );
+    TINY_DELETE(conn_);
+    TINY_DELETE( loop_ );
 
 }
 
@@ -51,7 +53,8 @@ void TcpClient::init()
 
 void TcpClient::connect()
 {
-
+    isConnect_ = true;
+    connector_->start();
 }
 
 void TcpClient::disconnect()
@@ -62,26 +65,50 @@ void TcpClient::disconnect()
 
 void TcpClient::stop()
 {
-
+    isConnect_ = false;
+    connector_->stop();
 }
 
-void TcpClient::onNewConn()
+void TcpClient::onNewConn( int* fd, struct sockaddr_in* addr  )
 {
+
+    Connection* conn  = new Connection( *fd, loop_ ,*addr );
+
+    conn->setReadCallBack(  new ReadCallBack( this, &TcpClient::onRead ) );
+    conn->setWriteCallBack( new WriteCallBack( this, &TcpClient::onWrite ));
+    conn->setCloseCallBack( new CloseCallBack( this, &TcpClient::onRemoveConnection ) );
+    connectionList_.push_back( conn );
+
+    onConn();
+
+    conn->onConnFinish();
 
 }
 
 void TcpClient::onRead( Connection* conn, int* data )
 {
-
+    LOG_INFO("on read ");
 }
 
 void TcpClient::onWrite( Connection* conn, int* data )
 {
 
+    LOG_INFO("on write ");
 }
 
 void TcpClient::onClose( Connection* conn, int* data )
 {
 
+    LOG_INFO("on close ");
 }
+
+void TcpClient::onConn()
+{
+    LOG_INFO("on conn ");
+}
+
+
+
+
+
 

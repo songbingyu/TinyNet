@@ -61,7 +61,8 @@ int  Connection::onWrite( )
 int  Connection::onClose( )
 {
     state_ = CS_DisConnected;
-    removeEvent();
+    ev_.stop( loop_ );
+
 #ifdef _DEBUG_
     assert( NULL != closeCallBack_ );
 #endif
@@ -86,6 +87,14 @@ int  Connection::onConnFinish()
     ev_.setUserData( (void*)this );
     ev_.start( loop_ );
     return 1;
+}
+
+int Connection::onConnDestory()
+{
+    if( state_ == CS_Connected ){
+        state_ = CS_DisConnected;
+        ev_.stop( loop_ );
+    }
 }
 
 void Connection::onEvents( EventLoop* loop, IEvent* ev, int revents )

@@ -57,7 +57,7 @@ private:
     States      state_;
     EventIo*    ev_;
     int         retryCnt_;
-typedef  CallBackDelegate<TcpClient, int , void* >     NewConnCallBack;
+typedef  CallBackDelegate<TcpClient, int , struct sockaddr_in  >     NewConnCallBack;
     NewConnCallBack*    newConnCb_;
 
 };

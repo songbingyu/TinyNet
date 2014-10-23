@@ -148,12 +148,15 @@ void Connector::onWrite()
         if( err ){
             LOG_WARN("Connector onWrite get socket error :%d ", err );
             retry( fd );
-        } else if( socketHelper_.isSelfCOnnect( fd ) ){
+        } else if( socketHelper_.isSelfConnect( fd ) ){
             LOG_WARN("Connector onWrite is self socket  :%d ", err );
             retry( fd );
         }else {
             setState( kConnected );
             if( connect_ ){
+
+                struct sockaddr_in addr = socketHelper_.getPeerAddr( fd );
+                newConnCb_( fd,&addr );
 
             }else {
                 socketHelper_.close( fd );

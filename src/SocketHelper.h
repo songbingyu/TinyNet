@@ -7,7 +7,6 @@
 
 struct sockaddr_in;
 
-
 //socket op wraper.
 class   SocketHelper
 {
@@ -32,8 +31,14 @@ public:
     int     setReusePort ( int fd,bool isOPen );
     int     setKeepAlive ( int fd,bool isOpen );
 
+    int     getSocketError( int fd );
+    struct sockaddr_in   getLocalAddr( int fd );
+    struct sockaddr_int  getPeerAddr( int fd );
+    bool    isSelfConnect( int fd );
 private:
     int     setSocketOpt( int fd,int optname, int& optval );
+private:
+    int fd_;
 };
 
 

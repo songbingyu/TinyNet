@@ -165,6 +165,52 @@ int SocketHelper::setKeepAlive( int fd, bool isOpen )
     return 1;
 }
 
+int getSocketError( int fd  )
+{
+    int val;
+    socklen_t len = (socklen_t)sizeof( val );
+    if( getsockopt( fd, SOL_SOCKET, SO_ERROR, &val, &len ) ){
+        return errno;
+    }else {
+        return  val;
+    }
+}
+
+struct sockaddr_in getLocalAddr( int fd )
+{
+    struct sockaddr_in local;
+    bzero( &local, sizeof(local) );
+    socklen_t len = (socklen_t)sizeof( local );
+
+    if( getsockname( fd, ( struct sockaddr* )&local, &len ) ){
+        LOG_ERROR(" getsocketname fail ");
+    }
+
+    return local;
+}
+
+struct sockaddr_in getPeerAddr( int fd )
+{
+    struct sockaddr_in peer;
+    bzero( &peer, sizeof(peer) );
+    socklen_t len = (socklen_t)sizeof( peer );
+
+    if( getpeername( fd, ( struct sockaddr*)&peer, &len ) ){
+        LOG_ERROR(" getsocketname fail ");
+    }
+
+    return peer;
+
+}
+
+bool isSelfConnect( int fd )
+{
+    struct sockaddr_in local = getLocalAddr( fd );
+    struct sockaddr_in  peer = getPeerAddr( fd );
+
+    return local.sin_port == peer.sin_port  &&
+        local.sin_addr.s_addr == peer.sin_addr.s_addr;
+}
 
 int SocketHelper::setSocketOpt( int fd, int optname, int& optval )
 {

@@ -43,6 +43,7 @@
 #endif
 
 
+
 typedef     double          Timestamp;
 
 enum  EventIOType
@@ -71,6 +72,7 @@ enum
 
 
 #define  tiny_assert( expr )     assert( expr )
+#define  TINY_DELETE( v )  { delete v; v = NULL; }
 
 #define MIN_TIMEJUMP    1.
 #define MAX_BLOCKTIME  59.743

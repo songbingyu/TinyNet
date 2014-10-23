@@ -11,7 +11,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_COMPILER "g++")
-set(CMAKE_CXX_FLAGS " -g -Wall -Werror ")
+set(CMAKE_CXX_FLAGS " -g -Wall -Werror -std=c++0x ")
 
 set(CMAKE_CXX_FLAGS_DEBUG "-O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
@@ -25,6 +25,7 @@ set(LIBRARY_OUTPUT_PATH    ${PROJECT_BINARY_DIR}/lib)
 
 ADD_SUBDIRECTORY(exam)
 ADD_SUBDIRECTORY(src)
+#ADD_SUBDIRECTORY(tem)
 
 
 

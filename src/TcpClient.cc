@@ -9,8 +9,10 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include "Connector.h"
+#include "Connection.h"
 #include "EventLoop.h"
 
+using namespace std::placeholders;
 
 TcpClient::TcpClient( const char* ip, int port ): serverIp_( ip ), serverPort_( port )
 {
@@ -43,10 +45,10 @@ void TcpClient::init()
     loop_ = new EventLoop();
     assert( loop_ != NULL );
 
-    connctor_ = new Connector( loop_, addr );
+    connector_ = new Connector( loop_, addr );
     assert( connector_ != NULL );
 
-    connector_->setNewConnCb( new NewConnCallBack( this, &TcpClient::onNewConn) );
+    connector_->setNewConnCb( std::bind( &TcpClient::onNewConn, this, _1, _2 ) );
 
     isConnect_ = true;
 }
@@ -69,15 +71,14 @@ void TcpClient::stop()
     connector_->stop();
 }
 
-void TcpClient::onNewConn( int* fd, struct sockaddr_in* addr  )
+void TcpClient::onNewConn( int fd, struct sockaddr_in& addr  )
 {
 
-    Connection* conn  = new Connection( *fd, loop_ ,*addr );
+    Connection* conn  = new Connection( fd, loop_, addr );
 
-    conn->setReadCallBack(  new ReadCallBack( this, &TcpClient::onRead ) );
-    conn->setWriteCallBack( new WriteCallBack( this, &TcpClient::onWrite ));
-    conn->setCloseCallBack( new CloseCallBack( this, &TcpClient::onRemoveConnection ) );
-    connectionList_.push_back( conn );
+    conn->setReadCallBack( std::bind( &TcpClient::onRead, this, _1 ) );
+    conn->setWriteCallBack( std::bind( &TcpClient::onWrite, this, _1 ));
+    conn->setCloseCallBack( std::bind( &TcpClient::onRemoveConnection, this, _1 ));
 
     onConn();
 
@@ -85,18 +86,23 @@ void TcpClient::onNewConn( int* fd, struct sockaddr_in* addr  )
 
 }
 
-void TcpClient::onRead( Connection* conn, int* data )
+void TcpClient::onRemoveConnection( Connection* conn )
+{
+
+}
+
+void TcpClient::onRead( Connection* conn  )
 {
     LOG_INFO("on read ");
 }
 
-void TcpClient::onWrite( Connection* conn, int* data )
+void TcpClient::onWrite( Connection* conn )
 {
 
     LOG_INFO("on write ");
 }
 
-void TcpClient::onClose( Connection* conn, int* data )
+void TcpClient::onClose( Connection* conn )
 {
 
     LOG_INFO("on close ");

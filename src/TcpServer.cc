@@ -17,6 +17,9 @@
 #include "EventLoop.h"
 #include "TcpServer.h"
 
+using namespace std::placeholders;
+
+
 void PrintLog()
 {
     printf("--------Welcome to use TinyNet CopyRight by bingyu ----------\n");
@@ -103,11 +106,12 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
     assert( NULL == addr );
 #endif
 
-    Connection* conn  = new Connection( *fd, loop_ );
+    Connection* conn  = new Connection( *fd, loop_,*addr );
 
-    conn->setReadCallBack(  new ReadCallBack( this, &TcpServer::onRead ) );
-    conn->setWriteCallBack( new WriteCallBack( this, &TcpServer::onWrite ));
-    conn->setCloseCallBack( new CloseCallBack( this, &TcpServer::onRemoveConnection ) );
+    conn->setReadCallBack( std::bind( &TcpServer::onRead, this, _1 ) );
+    conn->setWriteCallBack( std::bind( &TcpServer::onWrite, this, _1 ));
+    conn->setCloseCallBack( std::bind( &TcpServer::onRemoveConnection, this, _1 ));
+
     connectionList_.push_back( conn );
 
     conn->onConnFinish();
@@ -117,7 +121,7 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
     return ;
 }
 
-void TcpServer::onRemoveConnection( Connection* conn, int* arg )
+void TcpServer::onRemoveConnection( Connection* conn )
 {
     onClose( conn );
 
@@ -125,7 +129,7 @@ void TcpServer::onRemoveConnection( Connection* conn, int* arg )
     LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());
     std::remove(connectionList_.begin(),connectionList_.end(),conn );
     delete conn;
-
+    return;
 }
 
 
@@ -136,13 +140,13 @@ int TcpServer::onConnection( Connection* conn )
 }
 
 
-void TcpServer::onRead( Connection* conn, int* arg  )
+void TcpServer::onRead( Connection* conn )
 {
     LOG_INFO(" read conn ");
     return ;
 }
 
-void TcpServer::onWrite( Connection* conn, int* arg )
+void TcpServer::onWrite( Connection* conn )
 {
     LOG_INFO(" write conn ");
     return ;

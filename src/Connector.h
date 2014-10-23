@@ -6,7 +6,7 @@
 #ifndef _CONNECTOR_H_
 #define _CONNECTOR_H_
 
-
+#include <functional>
 #include "TinyDefine.h"
 #include <netinet/in.h>
 #include "CallBackDelegate.h"
@@ -18,6 +18,9 @@ class EventIo;
 class EventLoop;
 
 
+//typedef  CallBackDelegate<TcpClient, int , struct sockaddr_in  >     NewConnCallBack;
+typedef std::function< void ( int, struct sockaddr_in& addr ) > NewConnCallBack;
+
 class Connector
 {
 public:
@@ -27,7 +30,7 @@ public:
     void start();
     void restart();
     void stop();
-    void setNewConnCb( NewConnCallBack* cb ) { newConnCb_ = cb; }
+    void setNewConnCb(const  NewConnCallBack& cb ) { newConnCb_ = cb; }
 public:
     static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 private:
@@ -36,11 +39,11 @@ private:
         kDisConnect,
         kConnecting,
         kConnected,
-    }
+    };
 
     enum {
-        kMaxReTryCnt = 3;
-    }
+        kMaxReTryCnt = 3,
+    };
 
     tiny_forceinline  void setState( States s) { state_ = s; }
     void connect();
@@ -57,8 +60,7 @@ private:
     States      state_;
     EventIo*    ev_;
     int         retryCnt_;
-typedef  CallBackDelegate<TcpClient, int , struct sockaddr_in  >     NewConnCallBack;
-    NewConnCallBack*    newConnCb_;
+    NewConnCallBack    newConnCb_;
 
 };
 

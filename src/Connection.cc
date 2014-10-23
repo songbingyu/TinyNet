@@ -19,15 +19,6 @@ Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IC
 Connection::~Connection()
 {
 
-    delete readCallback_;
-    readCallback_  = NULL;
-
-    delete  writeCallback_;
-    writeCallback_ = NULL;
-
-    delete  closeCallBack_;
-    closeCallBack_ = NULL;
-
 }
 
 
@@ -41,19 +32,13 @@ int  Connection::onRead( )
         onClose();
     }
 
-    if( readCallback_ )
-    {
-        readCallback_->callback( this, NULL );
-    }
+    readCallback_( this );
     return 1;
 }
 
 int  Connection::onWrite( )
 {
-    if( writeCallback_ )
-    {
-         writeCallback_->callback( this, NULL );
-    }
+    writeCallback_(this);
     return 1;
 }
 
@@ -67,11 +52,7 @@ int  Connection::onClose( )
     assert( NULL != closeCallBack_ );
 #endif
 
-    if( NULL != closeCallBack_ )
-    {
-        closeCallBack_->callback( this, NULL );
-    }
-
+    closeCallBack_( this );
     return 1;
 }
 
@@ -95,6 +76,8 @@ int Connection::onConnDestory()
         state_ = CS_DisConnected;
         ev_.stop( loop_ );
     }
+
+    return 1;
 }
 
 void Connection::onEvents( EventLoop* loop, IEvent* ev, int revents )

@@ -7,7 +7,7 @@
 #define  _TCP_SERVER_H_
 
 
-#include<list>
+#include <list>
 
 class  IConnection;
 class  Connection;
@@ -26,17 +26,17 @@ private:
     int     init();
 public:
     void    onNewConnection( int*  fd, struct sockaddr_in*  addr  );
-    void    onRemoveConnection( Connection* conn, int* arg = NULL );
+    void    onRemoveConnection( Connection* conn );
 public:
     int     onConnection( Connection* conn );
-    void    onRead ( Connection* conn, int*  arg= NULL );
-    void    onWrite( Connection* conn, int*  arg= NULL );
+    void    onRead ( Connection* conn );
+    void    onWrite( Connection* conn );
     void    onClose( Connection* conn );
 private:
     int                     port_;
     TcpAcceptor*            acceptor_;
     EventLoop*              loop_;
-    typedef   std::list<IConnection*> ConnectionList;
+    typedef   std::list<Connection*> ConnectionList;
     ConnectionList          connectionList_;
 };
 

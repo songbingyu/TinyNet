@@ -24,11 +24,12 @@ public:
     void connect();
     void stop();
     void disconnect();
-    void onNewConn( int* fd, struct sockaddr_in* addr  );
+    void onNewConn( int fd, struct sockaddr_in& addr  );
+    void onRemoveConnection( Connection* conn );
     void onConn();
-    void onRead( Connection* conn, int* data );
-    void onWrite( Connection* conn, int* data );
-    void onClose( Connection* conn, int* data );
+    void onRead( Connection* conn );
+    void onWrite( Connection* conn );
+    void onClose( Connection* conn );
 private:
 
     std::string serverIp_;

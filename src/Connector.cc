@@ -12,8 +12,7 @@ Connector::Connector( EventLoop* loop, struct sockaddr_in& addr ):loop_( loop ),
                                                                  connect_( false ),
                                                                  state_( kDisConnect ),
                                                                  ev_( NULL ),
-                                                                 retryCnt_(0),
-                                                                 newConnCb_( NULL ),
+                                                                 retryCnt_(0)
 
 {
 
@@ -21,7 +20,6 @@ Connector::Connector( EventLoop* loop, struct sockaddr_in& addr ):loop_( loop ),
 
 Connector::~Connector()
 {
-    TINY_DELETE( newConnCb_ );
     stop();
 }
 
@@ -156,7 +154,7 @@ void Connector::onWrite()
             if( connect_ ){
 
                 struct sockaddr_in addr = socketHelper_.getPeerAddr( fd );
-                newConnCb_( fd,&addr );
+                newConnCb_( fd,addr );
 
             }else {
                 socketHelper_.close( fd );
@@ -172,7 +170,7 @@ void Connector::onError()
         int fd  = ev_->getFd();
         delEvent();
 
-        int err = socketHelper_.getSocketError();
+        int err = socketHelper_.getSocketError( fd );
 
         LOG_WARN("Connector on error :%d ", err );
         retry( fd );

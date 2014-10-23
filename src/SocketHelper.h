@@ -2,7 +2,8 @@
  *  CopyRight  2014 , bingyu.song   All Right Reserved
     I believe  Spring brother
  */
-
+#ifndef _SOCKET_HELPER_H_
+#define _SOCKET_HELPER_H_
 
 
 struct sockaddr_in;
@@ -33,7 +34,7 @@ public:
 
     int     getSocketError( int fd );
     struct sockaddr_in   getLocalAddr( int fd );
-    struct sockaddr_int  getPeerAddr( int fd );
+    struct sockaddr_in  getPeerAddr( int fd );
     bool    isSelfConnect( int fd );
 private:
     int     setSocketOpt( int fd,int optname, int& optval );
@@ -41,7 +42,7 @@ private:
     int fd_;
 };
 
-
+#endif // _SOCKET_HELPER_H_
 
 
 

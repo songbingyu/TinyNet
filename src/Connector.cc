@@ -12,7 +12,8 @@ Connector::Connector( EventLoop* loop, struct sockaddr_in& addr ):loop_( loop ),
                                                                  connect_( false ),
                                                                  state_( kDisConnect ),
                                                                  ev_( NULL ),
-                                                                 retryCnt_(0)
+                                                                 retryCnt_(0),
+                                                                 newConnCb_( NULL ),
 
 {
 
@@ -20,6 +21,7 @@ Connector::Connector( EventLoop* loop, struct sockaddr_in& addr ):loop_( loop ),
 
 Connector::~Connector()
 {
+    TINY_DELETE( newConnCb_ );
     stop();
 }
 
@@ -112,11 +114,6 @@ void Connector::retry( int fd )
     }
 }
 
-void Connector::delEvent( )
-{
-
-}
-
 void Connector::onWaitConnectFinish( int fd )
 {
     tiny_assert( NULL != ev_ );
@@ -149,15 +146,39 @@ void Connector::onWrite()
         int err = socketHelper_.getSocketError( fd );
 
         if( err ){
+            LOG_WARN("Connector onWrite get socket error :%d ", err );
             retry( fd );
-        } else if( )
+        } else if( socketHelper_.isSelfCOnnect( fd ) ){
+            LOG_WARN("Connector onWrite is self socket  :%d ", err );
+            retry( fd );
+        }else {
+            setState( kConnected );
+            if( connect_ ){
+
+            }else {
+                socketHelper_.close( fd );
+            }
+        }
     }
 }
 
 void Connector::onError()
 {
+    if( state_ == kConnecting )
+    {
+        int fd  = ev_->getFd();
+        delEvent();
 
+        int err = socketHelper_.getSocketError();
+
+        LOG_WARN("Connector on error :%d ", err );
+        retry( fd );
+    }
 }
+
+
+
+
 
 
 

@@ -9,7 +9,7 @@
 
 #include "TinyDefine.h"
 #include <netinet/in.h>
-
+#include "CallBackDelegate.h"
 #include "SocketHelper.h"
 
 
@@ -27,6 +27,7 @@ public:
     void start();
     void restart();
     void stop();
+    void setNewConnCb( NewConnCallBack* cb ) { newConnCb_ = cb; }
 public:
     static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 private:
@@ -56,6 +57,8 @@ private:
     States      state_;
     EventIo*    ev_;
     int         retryCnt_;
+typedef  CallBackDelegate<TcpClient, int , void* >     NewConnCallBack;
+    NewConnCallBack*    newConnCb_;
 
 };
 

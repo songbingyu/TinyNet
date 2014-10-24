@@ -35,7 +35,7 @@ public:
     void stop() {  isRuning_ = false; }
 
 public:
-     int run();
+     int run( int flags );
 public:
      void addPendingEvent( IEvent* ev, int evFlag );
      void delPendingEvent(IEvent* ev );

@@ -86,6 +86,13 @@ enum EventState
     ES_Del,
 };
 
+enum EventRunFlag
+{
+    EVRUN_ALWAYES,
+    EVRUN_NOWAIT,
+    EVRUN_ONCE,
+};
+
 const static int kHeap0 = 1;
 
 extern Timestamp  tinyGetTime();

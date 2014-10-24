@@ -55,7 +55,7 @@ void TcpClient::init()
 
 void TcpClient::run()
 {
-    loop_->run();
+    loop_->run( EVRUN_ALWAYES );
 }
 
 void TcpClient::connect()

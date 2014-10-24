@@ -89,11 +89,11 @@ void TcpServer::run( )
 {
      if( !acceptor_->isListen() )
      {
-       //LOG_ERROR("not listen ");
+       LOG_ERROR("not listen, please first bind and listen ");
        return;
      }
 
-    loop_-> run();
+    loop_-> run( EVRUN_ALWAYES );
 
     return;
 

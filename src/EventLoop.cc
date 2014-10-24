@@ -19,16 +19,22 @@ EventLoop::EventLoop(): isRuning_( true ), curPid_(0), signalHelper_(this)
 
 EventLoop::~EventLoop()
 {
-    delete  poller_;
+    TINY_DELETE( poller_ );
+    pendingEvents_.clear();
+    activeFdEvents_.clear();
+    changeFds_.clear();
+    timers_.clear();
+    rFeeds_.clear();
 }
 
-int  EventLoop::run()
+int  EventLoop::run( int flags )
 {
     do {
         if( expect_false(curPid_) ) {
             curPid_ = getpid();
         }
 
+        invokePending();
         fdReify();
 
         //time
@@ -38,10 +44,10 @@ int  EventLoop::run()
             Timestamp   sleepTime=0.;
             updateTime( 1e100 );
 
-            if( expect_true( getTimerCount() > 0 ) ) {
+            if( expect_true( !( flags&EVRUN_NOWAIT  || !activeCnt_ ) ) ) {
                 waitTime = MAX_BLOCKTIME;
 
-                if( !activeFdEvents_.empty() )
+                if( getTimerCount() > 0  )
                 {
                     Timestamp to = timers_[kHeap0]->getAt() -  curTime_;
                     if( waitTime > to )  waitTime = to;
@@ -79,9 +85,10 @@ int  EventLoop::run()
 
 
         }
-    }while( isRuning_ );
+    }while( expect_true( activeCnt_ &&
+                !( flags & ( EVRUN_ONCE|EVRUN_NOWAIT )) ));
 
-   return  1;
+   return  activeCnt_;
 
 }
 

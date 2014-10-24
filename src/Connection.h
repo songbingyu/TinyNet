@@ -23,9 +23,9 @@ typedef std::function< void  ( Connection* ) > CloseCallBack;
 enum ConnectionState
 {
     CS_No,
-    //CS_Connecing,
+    CS_Connecing,
     CS_Connected,
-    //CS_DisConnecting,
+    CS_DisConnecting,
     CS_DisConnected,
 };
 

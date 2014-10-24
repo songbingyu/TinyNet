@@ -13,7 +13,6 @@
 #include <algorithm>
 #include "Log.h"
 #include "TcpAcceptor.h"
-#include "Connection.h"
 #include "EventLoop.h"
 #include "TcpServer.h"
 
@@ -38,12 +37,8 @@ TcpServer::TcpServer( int port ): port_( port )
 TcpServer::~TcpServer()
 {
     port_ = -1;
-
-    delete  acceptor_;
-    acceptor_  = NULL;
-    delete  loop_;
-    loop_ = NULL;
-
+    TINY_DELETE( acceptor_ );
+    TINY_DELETE( loop_ )
 }
 
 
@@ -108,8 +103,8 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 
     Connection* conn  = new Connection( *fd, loop_,*addr );
 
-    conn->setReadCallBack( std::bind( &TcpServer::onRead, this, _1 ) );
-    conn->setWriteCallBack( std::bind( &TcpServer::onWrite, this, _1 ));
+    conn->setReadCallBack( readCallBack_ );
+    conn->setWriteCallBack( writeCallback_ );
     conn->setCloseCallBack( std::bind( &TcpServer::onRemoveConnection, this, _1 ));
 
     connectionList_.push_back( conn );
@@ -123,12 +118,12 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 
 void TcpServer::onRemoveConnection( Connection* conn )
 {
-    onClose( conn );
+    closeCallBack_( conn );
 
     //should map?
     LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());
     std::remove(connectionList_.begin(),connectionList_.end(),conn );
-    delete conn;
+    TINY_DELETE( conn );
     return;
 }
 
@@ -140,27 +135,6 @@ int TcpServer::onConnection( Connection* conn )
 }
 
 
-void TcpServer::onRead( Connection* conn )
-{
-    LOG_INFO(" read conn ");
-    return ;
-}
 
-void TcpServer::onWrite( Connection* conn )
-{
-    LOG_INFO(" write conn ");
-    return ;
-}
-
-void TcpServer::onClose( Connection* conn )
-{
-
-    //First call user define func
-
-    //delete from list
-    //
-
-    return ;
-}
 
 

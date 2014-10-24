@@ -8,9 +8,9 @@
 
 
 #include <list>
+#include "Connection.h"
 
 class  IConnection;
-class  Connection;
 class  TcpAcceptor;
 class  EventLoop;
 
@@ -29,15 +29,19 @@ public:
     void    onRemoveConnection( Connection* conn );
 public:
     int     onConnection( Connection* conn );
-    void    onRead ( Connection* conn );
-    void    onWrite( Connection* conn );
-    void    onClose( Connection* conn );
+    void    setReadCallBack( const ReadCallBack& cb ) { readCallBack_ = cb; }
+    void    setWriteCallBack( const WriteCallBack& cb ) { writeCallback_ = cb; }
+    void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
 private:
     int                     port_;
     TcpAcceptor*            acceptor_;
     EventLoop*              loop_;
     typedef   std::list<Connection*> ConnectionList;
     ConnectionList          connectionList_;
+
+    ReadCallBack    readCallBack_;
+    WriteCallBack   writeCallback_;
+    CloseCallBack   closeCallBack_;
 };
 
 #endif // _TCP_SERVER_H_

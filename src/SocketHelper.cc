@@ -165,7 +165,7 @@ int SocketHelper::setKeepAlive( int fd, bool isOpen )
     return 1;
 }
 
-int getSocketError( int fd  )
+int SocketHelper::getSocketError( int fd  )
 {
     int val;
     socklen_t len = (socklen_t)sizeof( val );
@@ -176,7 +176,7 @@ int getSocketError( int fd  )
     }
 }
 
-struct sockaddr_in getLocalAddr( int fd )
+struct sockaddr_in SocketHelper::getLocalAddr( int fd )
 {
     struct sockaddr_in local;
     bzero( &local, sizeof(local) );
@@ -189,7 +189,7 @@ struct sockaddr_in getLocalAddr( int fd )
     return local;
 }
 
-struct sockaddr_in getPeerAddr( int fd )
+struct sockaddr_in SocketHelper::getPeerAddr( int fd )
 {
     struct sockaddr_in peer;
     bzero( &peer, sizeof(peer) );
@@ -203,7 +203,7 @@ struct sockaddr_in getPeerAddr( int fd )
 
 }
 
-bool isSelfConnect( int fd )
+bool SocketHelper::isSelfConnect( int fd )
 {
     struct sockaddr_in local = getLocalAddr( fd );
     struct sockaddr_in  peer = getPeerAddr( fd );

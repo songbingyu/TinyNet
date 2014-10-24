@@ -19,6 +19,7 @@ void ActiveFdEvent::delList( EventIo* ev )
 
         if( expect_true( *head == ev ) ){
             *head = *ev->getNext();
+            break;
         }
 
         head =(*head)->getNext();

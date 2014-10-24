@@ -114,7 +114,7 @@ void Connector::retry( int fd )
 
 void Connector::onWaitConnectFinish( int fd )
 {
-    tiny_assert( NULL != ev_ );
+    tiny_assert( NULL == ev_ );
     tiny_assert( state_ == kDisConnect );
     setState( kConnecting );
     ev_ = new EventIo( Connector::onEvents,fd, EV_WRITE );

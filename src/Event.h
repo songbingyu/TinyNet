@@ -53,7 +53,7 @@ protected:
 class  EventList  : public IEvent
 {
 public:
-    EventList( EVENT_CB cb ) :IEvent(cb)
+    EventList( EVENT_CB cb ) :IEvent(cb),next_(NULL)
     {
 
     }

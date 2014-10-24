@@ -21,6 +21,7 @@ public:
     ~TcpClient();
 public:
     void init( );
+    void run();
     void connect();
     void stop();
     void disconnect();

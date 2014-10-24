@@ -30,7 +30,7 @@ public:
     void start();
     void restart();
     void stop();
-    void setNewConnCb(const  NewConnCallBack& cb ) { newConnCb_ = cb; }
+    void setNewConnCb( const  NewConnCallBack& cb ) { newConnCb_ = cb; }
 public:
     static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 private:

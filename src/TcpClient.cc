@@ -53,6 +53,11 @@ void TcpClient::init()
     isConnect_ = true;
 }
 
+void TcpClient::run()
+{
+    loop_->run();
+}
+
 void TcpClient::connect()
 {
     isConnect_ = true;

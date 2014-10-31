@@ -56,9 +56,9 @@ public:
      tiny_forceinline int         getTimerCount()     { return timers_.size() - 1; }
      tiny_forceinline void  setIoBlockTime( Timestamp interval ) { ioBlockTime_ = interval; }
      void invokePending();
+     tiny_forceinline   bool addChangeFd( int fd, int flags );
 private:
      IPoller* getRecommendedPoller();
-     tiny_forceinline   bool addChangeFd( int fd, int flags );
      tiny_forceinline   void fdReify();
      tiny_forceinline   void updateTime( Timestamp maxBlockTime );
      tiny_noinline tiny_cold void timerReSchedule( Timestamp adjust );

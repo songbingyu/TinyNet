@@ -8,6 +8,7 @@
 #include <errno.h>
 #include "EventLoop.h"
 #include "Event.h"
+#include "Log.h"
 
 
 using namespace Tiny;

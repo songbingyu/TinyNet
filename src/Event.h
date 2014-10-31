@@ -8,7 +8,6 @@
 
 #include "TinyDefine.h"
 #include "CallBackDelegate.h"
-#include "Log.h"
 
 
 // all event base
@@ -91,7 +90,7 @@ class EventIo : public EventList
 {
 
 public:
-    EventIo( EventLoop* loop, EVENT_CB cb, int fd , int events ):EventList( loop, cb ), fd_(fd),events_( events | EV_IOFDSET )
+    EventIo( EventLoop* loop, EVENT_CB cb, int fd , int events ):EventList( loop, cb ), fd_(fd),events_( events )
     {
 
     }
@@ -101,10 +100,11 @@ public:
     }
 
     tiny_forceinline    int getFd()       const { return fd_;     }
-    tiny_forceinline    void setEvents( int flag ) { events_ = flag; }
+    //tiny_forceinline    void setEvents( int flag ) { events_ = flag; }
     tiny_forceinline    int getEvents()   const { return events_; }
-    tiny_forceinline    bool iReading() const { return events_&EV_READ;   }
+    tiny_forceinline    bool isReading() const { return events_&EV_READ;   }
     tiny_forceinline    bool isWriting() const { return events_&EV_WRITE; }
+    tiny_forceinline    bool changeEvents( int events );
 
 
 public:

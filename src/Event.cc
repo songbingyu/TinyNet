@@ -7,6 +7,7 @@
 #include <signal.h>
 #include "SignalHelper.h"
 #include "EventLoop.h"
+#include "Log.h"
 
 void IEvent:: onEvent( int revents )
 {
@@ -28,6 +29,16 @@ void IEvent::ev_stop()
     loop_->delActiveCnt();
 }
 
+bool EventIo::changeEvents( int events )
+{
+    tiny_assert( events != EV_NO );
+    if( expect_false( !isActive()|| events_ == events  )){
+        LOG_SYS(" change events eventio not active ");
+        return false;
+    }
+    loop_->addChangeFd( fd_, EV_IOFDSET );
+    return true;
+}
 
 void EventIo::start()
 {
@@ -119,5 +130,6 @@ void EventSignal::stop()
 
     signal( sigNum_, SIG_DFL );
 }
+
 
 

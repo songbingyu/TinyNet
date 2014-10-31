@@ -129,9 +129,7 @@ void EventLoop::addActiveFdEvent(EventIo* ev )
 
     activeEv->addList( ev );
 
-    addChangeFd( ev->getFd(), ev->getEvents()&EV_IOFDSET );
-
-    ev->setEvents( ev->getEvents()&~EV_IOFDSET );
+    addChangeFd( ev->getFd(), EV_IOFDSET );
 
 }
 

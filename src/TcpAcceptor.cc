@@ -19,7 +19,7 @@
 
 TcpAcceptor::TcpAcceptor( int fd, EventLoop* loop, struct sockaddr_in&  addr ): IConnection( fd, loop ),
                                                                                 localAddr_(addr),
-                                                                                ev_(TcpAcceptor::onEvents, fd, EV_READ )
+                                                                                ev_(loop,TcpAcceptor::onEvents, fd, EV_READ )
 {
 
     bindAndListen();
@@ -59,7 +59,7 @@ int TcpAcceptor::bindAndListen( )
     isListening_ = true;
 
     ev_.setUserData( (void*)this);
-    ev_.start( loop_ );
+    ev_.start();
 
     return  1;
 }

@@ -274,7 +274,7 @@ void EventLoop::timersReify()
 
                     Tiny::downHeap( timers_, getTimerCount(), kHeap0 );
                 } else {
-                    ev->stop( this );
+                    ev->stop();
                 }
 
                 addFeedReverse( (IEvent*)ev );
@@ -291,7 +291,7 @@ void EventLoop::invokePending( )
     for( int i=0; i < size; ++i ){
         PendingEvent* pe = pendingEvents_[i];
         pe->event_->setPending( 0 );
-        pe->event_->onEvent( this, pe->eventFlag_ );
+        pe->event_->onEvent( pe->eventFlag_ );
     }
 
     pendingEvents_.clear();

@@ -78,9 +78,9 @@ namespace Tiny
 
         fdInteral(evPipe_[1]);
 
-        ev_ = new EventIo( pipeEventCb, evPipe_[0], EV_READ );
+        ev_ = new EventIo( loop_, pipeEventCb, evPipe_[0], EV_READ );
 
-        ev_->start( loop_ );
+        ev_->start();
 
         loop_->delActiveCnt();
     }

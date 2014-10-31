@@ -9,12 +9,11 @@
 #include <functional>
 #include "TinyDefine.h"
 #include "IConnection.h"
-#include "TcpServer.h"
 #include "CallBackDelegate.h"
 #include "CircularBuffer.h"
 
 class EventLoop;
-
+class Connection;
 
 typedef std::function< void  ( Connection* ) > ReadCallBack;
 typedef std::function< void  ( Connection* ) > WriteCallBack;

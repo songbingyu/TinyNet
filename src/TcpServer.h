@@ -10,7 +10,6 @@
 #include <list>
 #include "Connection.h"
 
-class  IConnection;
 class  TcpAcceptor;
 class  EventLoop;
 

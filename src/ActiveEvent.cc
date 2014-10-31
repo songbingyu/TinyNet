@@ -30,7 +30,7 @@ void ActiveFdEvent::killFd( EventLoop* loop )
 {
     EventIo* ev = NULL;
     while( (ev = head_ ) ){
-        ev->stop( loop );
+        ev->stop();
         loop->addPendingEvent( (IEvent*)ev, EV_ERROR | EV_WRITE | EV_READ );
     }
 

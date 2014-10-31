@@ -11,7 +11,7 @@
 
 
 Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IConnection( fd, loop ),
-                                                                        ev_(Connection::onEvents, fd, EV_READ )
+                                                                        ev_(loop,Connection::onEvents, fd, EV_READ )
 {
 
 }
@@ -24,6 +24,7 @@ Connection::~Connection()
 
 void Connection::send( char* data, int len )
 {
+    if( state_ != CS_Connected ) return;
 
 }
 
@@ -59,7 +60,7 @@ int  Connection::onWrite( )
 int  Connection::onClose( )
 {
     state_ = CS_DisConnected;
-    ev_.stop( loop_ );
+    ev_.stop();
 
 #ifdef _DEBUG_
     assert( NULL != closeCallBack_ );
@@ -79,7 +80,7 @@ int  Connection::onConnFinish()
 {
     state_ = CS_Connected;
     ev_.setUserData( (void*)this );
-    ev_.start( loop_ );
+    ev_.start();
     return 1;
 }
 
@@ -87,7 +88,7 @@ int Connection::onConnDestory()
 {
     if( state_ == CS_Connected ){
         state_ = CS_DisConnected;
-        ev_.stop( loop_ );
+        ev_.stop();
     }
     return 1;
 }
@@ -113,5 +114,7 @@ void Connection::onEvents( EventLoop* loop, IEvent* ev, int revents )
         }
     }
 }
+
+
 
 

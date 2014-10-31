@@ -49,8 +49,7 @@ void Connector::stop()
 void Connector::delEvent( )
 {
     if( expect_true( NULL != ev_ )){
-
-        ev_->stop( loop_ );
+        ev_->stop();
         TINY_DELETE( ev_ );
     }
 }
@@ -117,9 +116,9 @@ void Connector::onWaitConnectFinish( int fd )
     tiny_assert( NULL == ev_ );
     tiny_assert( state_ == kDisConnect );
     setState( kConnecting );
-    ev_ = new EventIo( Connector::onEvents,fd, EV_WRITE );
+    ev_ = new EventIo( loop_,Connector::onEvents,fd, EV_WRITE );
     ev_->setUserData( this );
-    ev_->start( loop_ );
+    ev_->start();
 }
 
 void  Connector::onEvents( EventLoop* loop, IEvent* ev, int revents )

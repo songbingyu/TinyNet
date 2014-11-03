@@ -2,21 +2,24 @@
  *  CopyRight  2014 , bingyu.song   All Right Reserved
     I believe  Spring brother
  */
+#ifndef _CIRCULAR_BUFFER_H_
+#define _CIRCULAR_BUFFER_H_
 
 #include <errno.h>
 #include <assert.h>
 #include "ByteOrder.h"
 #include "Log.h"
 
+
 //is not a best way?
 template < size_t N >
 class  CircularBuffer
 {
 public:
-    CircularBuffer( ): begin_(0), end_( begin_ ), count_(0), size_( 0 ), data_( NULL )
+    CircularBuffer(): begin_(0), end_( begin_ ), count_(0), size_( 0 ), data_( NULL )
     {
 #ifdef  _DEBUG_
-        assert( N > 0 );
+        tiny_assert( N > 0 );
 #endif
         data_  = new char[N];
         size_   = N;
@@ -70,7 +73,7 @@ public:
 
     void retrieveInt8()
     {
-        retrieve(sizeof(int8));
+        retrieve(sizeof(int8_t));
     }
 
     void append( char* data, int len )
@@ -84,13 +87,13 @@ public:
         }
 
         if( end_ > begin_ ){
-            if( len_ > ( size_ - end_ ) ){
+            if( len > (int)( size_ - end_ ) ){
                 memcpy( data_+end_, data, size_-end_ );
                 memcpy( data_, data_+size_-end_, len-(size_-end_) );
             }else{
                 memcpy( data_+end_, data, len );
             }
-        }else{
+        } else {
             memcpy( data_+end_, data, len );
         }
 
@@ -142,7 +145,7 @@ public:
 
     bool peekInt16() const
     {
-        tiny_assert( capacity() >= sizof(int16_t) );
+        tiny_assert( capacity() >= sizeof(int16_t) );
         int16_t be16;
         peek( (char*)&be16,sizeof(int16_t) );
         return ByteOrder::netToHost16(be16);
@@ -173,7 +176,7 @@ public:
     int16_t readInt16()
     {
         int16_t ret = peekInt16();
-        retrieveIn16();
+        retrieveInt16();
         return ret;
     }
 
@@ -184,13 +187,13 @@ public:
         return ret;
     }
 
-    int32_t readFd( SocketHelper* socketHelper_, int fd );
+    int32_t readFd( SocketHelper* socketHelper_, int fd )
     {
         // should read 2 ?
         tiny_assert( freeSize() > 0 );
 
         int len =  begin_ <=  end_ ? size_ - end_ : begin_ - end_ ;
-        int ret =  socketHelper->read( fd ,  data_ + end_ ,  len  );
+        int ret =  socketHelper_->read( fd ,  data_ + end_ ,  len  );
         if( ret == 0 )
         {
             return -1;
@@ -203,7 +206,6 @@ public:
         }
         return len;
     }
-
 
     int32_t flushFd( SocketHelper* socketHelper_, int fd )
     {
@@ -227,9 +229,9 @@ public:
         } else {
             n = socketHelper_->write(  fd, data_ + begin_, size_ - begin_ );
             if( n > 0 ){
-                if( n == (size_ - begin_) ){
+                if( n == (int)(size_ - begin_) ){
                     //try continue write
-                    n += socketHelper_->write( fd, data_, ( cnt -(size_ - begin_) ) );
+                    n += socketHelper_->write( fd, data_, ( count_ -(size_ - begin_) ) );
                 }
             }
         }
@@ -246,6 +248,7 @@ private:
     char*    data_;
 };
 
+#endif // _CIRCULAR_BUFFER_H_
 
 
 

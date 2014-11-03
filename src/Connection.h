@@ -57,9 +57,9 @@ private:
     CloseCallBack          closeCallBack_;
     EventIo                 ev_;
 
-    static const size_t  c_BufSize = 1024*4;
-    CircularBuffer<char, c_BufSize>    readBuf_;
-    CircularBuffer<char, c_BufSize>    writeBuf_;
+    static const size_t kBufSize = 1024*4;
+    CircularBuffer<kBufSize>    readBuf_;
+    CircularBuffer<kBufSize>    writeBuf_;
 };
 
 #endif // _CONNECTION_H_

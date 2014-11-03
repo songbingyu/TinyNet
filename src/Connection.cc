@@ -79,7 +79,7 @@ int  Connection::onRead( )
     if( ret < 0  )
     {
         onClose();
-        return;
+        return 0;
     }
 
     readCallback_( this );
@@ -89,7 +89,7 @@ int  Connection::onRead( )
 int  Connection::onWrite( )
 {
     if( ev_.isWriteing() && writeBuf_.capacity() ){
-        int n = writeBuf_->flushFd( socketHelper_, sockfd_ );
+        int n = writeBuf_.flushFd( socketHelper_, sockfd_ );
         if( n <=0 ){
 
         }

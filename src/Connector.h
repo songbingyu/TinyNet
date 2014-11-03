@@ -53,7 +53,7 @@ private:
     void onWrite();
     void onError();
 private:
-    EventLoop* loop_;
+    EventLoop*  loop_;
     struct sockaddr_in localAddr_;
     SocketHelper socketHelper_;
     bool        connect_;

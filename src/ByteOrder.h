@@ -40,6 +40,7 @@ namespace ByteOrder
     {
         return be16toh(net16);
     }
+
 }// namespace  Byteorder
 
 

@@ -3,12 +3,12 @@
     I believe  Spring brother
  */
 
-#include<errno.h>
-#include<assert.h>
-#include"Log.h"
+#include <errno.h>
+#include <assert.h>
+#include "ByteOrder.h"
+#include "Log.h"
 
-// Fixme: consider other way?
-//
+//is not a best way?
 template < size_t N >
 class  CircularBuffer
 {
@@ -36,9 +36,10 @@ public:
     int      size()      {  return   size_; }
     int      capacity()  {  return   count_; }
     int      freeSize()  {  return   size_ - count_;    }
+
     void retrieveAll()
     {
-        end_ = begin_ = 0;
+        end_ = begin_ = count_ = 0;
     }
 
     void retrieve( int len )
@@ -46,6 +47,7 @@ public:
         tiny_assert( len <= capacity() );
         if(capacity() < len ){
             end_ = ( end_ + len )%size_;
+            count_ += len;
         }else{
             retrieveAll();
         }
@@ -59,6 +61,11 @@ public:
     void retrieveInt32()
     {
         retrieve(sizeof(int32_t));
+    }
+
+    void retrieveInt16()
+    {
+        retrieve(sizeof(int16_t));
     }
 
     void retrieveInt8()
@@ -86,6 +93,7 @@ public:
         }else{
             memcpy( data_+end_, data, len );
         }
+
         end_ = ( end_ + len )%size_;
         count_ += len;
     }
@@ -111,32 +119,123 @@ public:
             memcpy(buf, data_+ begin_, cnt);
         }
 
-        begin_ = ( begin_ + cnt)% size_;
-        count_ -= cnt;
+        // begin_ = ( begin_ + cnt)% size_;
+        //count_ -= cnt;
         return ;
     }
 
-
-
-    int     push( SocketHelper* socketHelper, int fd )
+    bool peekInt64() const
     {
-            // should read 2 ?
-            int len =  begin_ <=  end_ ? size_ - end_ : begin_ - end_ ;
-            int ret =  socketHelper->read( fd ,  data_ + end_ ,  len  );
-            if( ret == 0 )
-            {
-                return -1;
-            }
-            else  if( ret < 0 )
-            {
-                if(  errno != EWOULDBLOCK || errno != EAGAIN )  return -2;
-            }
-            else
-            {
-                end_ = (end_ +  ret )% size_;
-            }
+        tiny_asssert( capacity() >= sizeof(int64_t) );
+        int64_t be64 = 0;
+        peek( (char*)&be64, sizeof(int64_t) );
+        return ByteOrder::netToHost64(be64);
+    }
 
-            return 0;
+    bool peekInt32() const
+    {
+        tiny_assert( capacity() >= sizeof(int32_t) );
+        int32_t be32 = 0;
+        peek( (char*)&be32, sizeof(int32_t) );
+        return ByteOrder::netToHost32(be32);
+    }
+
+    bool peekInt16() const
+    {
+        tiny_assert( capacity() >= sizof(int16_t) );
+        int16_t be16;
+        peek( (char*)&be16,sizeof(int16_t) );
+        return ByteOrder::netToHost16(be16);
+    }
+
+    bool peekInt8() const
+    {
+        tiny_assert( capacity() >= sizeof(int8_t) );
+        int8_t be8;
+        peek( (char*)&be8, sizeof(int8_t) );
+        return be8;
+    }
+
+    int64_t readInt64()
+    {
+        int64_t ret = peekInt64();
+        retrieveInt64();
+        return ret;
+    }
+
+    int32_t readInt32()
+    {
+        int32_t ret = peekInt32();
+        retrieveInt32();
+        return ret;
+    }
+
+    int16_t readInt16()
+    {
+        int16_t ret = peekInt16();
+        retrieveIn16();
+        return ret;
+    }
+
+    int8_t readInt8()
+    {
+        int8_t ret = peekInt8();
+        retrieveInt8();
+        return ret;
+    }
+
+    int32_t readFd( SocketHelper* socketHelper_, int fd );
+    {
+        // should read 2 ?
+        tiny_assert( freeSize() > 0 );
+
+        int len =  begin_ <=  end_ ? size_ - end_ : begin_ - end_ ;
+        int ret =  socketHelper->read( fd ,  data_ + end_ ,  len  );
+        if( ret == 0 )
+        {
+            return -1;
+        } else  if( ret < 0 ) {
+
+            if(  errno != EWOULDBLOCK || errno != EAGAIN )  return -2;
+        } else {
+            end_ = (end_ +  ret )% size_;
+            count_ += len;
+        }
+        return len;
+    }
+
+
+    int32_t flushFd( SocketHelper* socketHelper_, int fd )
+    {
+        tiny_assert( capacity() > 0  );
+#ifdef _DEBUD_
+        char* sendBuf = new char[ capacity()];
+        peek( sendBuf, capacity() );
+
+        int n = socketHelper_->write( fd, sendBuf, capacity() );
+        if( n > 0 ){
+            retrieve( n );
+        } else {
+            //Fixme ? what should do ?
+        }
+
+        delete []sendBuf;
+#else
+        int n = 0;
+        if( begin_ <=  end_ ){
+            n = socketHelper_->write( fd, data_ + begin_, capacity() );
+        } else {
+            n = socketHelper_->write(  fd, data_ + begin_, size_ - begin_ );
+            if( n > 0 ){
+                if( n == (size_ - begin_) ){
+                    //try continue write
+                    n += socketHelper_->write( fd, data_, ( cnt -(size_ - begin_) ) );
+                }
+            }
+        }
+        retrieve( n );
+#endif
+        return n;
     }
 
 private:

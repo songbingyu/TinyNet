@@ -54,7 +54,7 @@ void Connection::send( char* data, int len )
             LOG_ERROR("connection socket buff over, fd:%d ,events:%d", sockfd_, ev_.getEvents() );
         }
 
-        writeBuf_.push( data+nwrite, remaining );
+        writeBuf_.append( data+nwrite, remaining );
 
         if( !ev_.isWriteing() ){
             ev_.changeEvents( ev_.getEvents()&EV_WRITE );
@@ -75,10 +75,11 @@ int  Connection::onRead( )
 {
 
     //read shoule do what?
-    int ret = readBuf_.push(socketHelper_, sockfd_ );
+    int ret = readBuf_.readFd(socketHelper_, sockfd_ );
     if( ret < 0  )
     {
         onClose();
+        return;
     }
 
     readCallback_( this );
@@ -87,8 +88,11 @@ int  Connection::onRead( )
 
 int  Connection::onWrite( )
 {
-    if( ev_.isWriteing() ){
+    if( ev_.isWriteing() && writeBuf_.capacity() ){
+        int n = writeBuf_->flushFd( socketHelper_, sockfd_ );
+        if( n <=0 ){
 
+        }
     }
     //writeCallback_(this);
     return 1;

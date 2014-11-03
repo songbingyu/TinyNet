@@ -153,7 +153,6 @@ int SocketHelper::setReusePort( int fd, bool isOpen )
 
 }
 
-
 int SocketHelper::setKeepAlive( int fd, bool isOpen )
 {
     int optval = isOpen ? 1 : 0;

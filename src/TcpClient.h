@@ -28,9 +28,10 @@ public:
     void onNewConn( int fd, struct sockaddr_in& addr  );
     void onRemoveConnection( Connection* conn );
     void onConn();
-    void onRead( Connection* conn );
-    void onWrite( Connection* conn );
-    void onClose( Connection* conn );
+
+    void    setReadCallBack( const ReadCallBack& cb ) { readCallBack_ = cb; }
+    void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
+
 private:
 
     std::string serverIp_;
@@ -40,6 +41,9 @@ private:
     bool        isConnect_;
     Connector*  connector_;
     Connection* conn_;
+
+    ReadCallBack    readCallBack_;
+    CloseCallBack   closeCallBack_;
 
 };
 

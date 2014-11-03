@@ -123,6 +123,7 @@ int  Connection::onConnFinish()
     state_ = CS_Connected;
     ev_.setUserData( (void*)this );
     ev_.start();
+    connCallBack_( this );
     return 1;
 }
 

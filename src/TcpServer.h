@@ -27,10 +27,10 @@ public:
     void    onNewConnection( int*  fd, struct sockaddr_in*  addr  );
     void    onRemoveConnection( Connection* conn );
 public:
-    int     onConnection( Connection* conn );
     void    setReadCallBack( const ReadCallBack& cb ) { readCallBack_ = cb; }
     void    setWriteCallBack( const WriteCallBack& cb ) { writeCallback_ = cb; }
     void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
+    void    setConnCallback( const ConnCallBack& cb ) { connCallBack_ = cb; }
 private:
     int                     port_;
     TcpAcceptor*            acceptor_;
@@ -41,9 +41,12 @@ private:
     ReadCallBack    readCallBack_;
     WriteCallBack   writeCallback_;
     CloseCallBack   closeCallBack_;
+    ConnCallBack    connCallBack_;
 };
 
 #endif // _TCP_SERVER_H_
+
+
 
 
 

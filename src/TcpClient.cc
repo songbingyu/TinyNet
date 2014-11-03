@@ -66,7 +66,11 @@ void TcpClient::connect()
 
 void TcpClient::disconnect()
 {
-
+    isConnect_ = false;
+    if( NULL != conn_ && conn_->isConnected() )
+    {
+        conn_->close();
+    }
 }
 
 
@@ -85,7 +89,6 @@ void TcpClient::onNewConn( int fd, struct sockaddr_in& addr  )
     conn->setWriteCallBack( std::bind( &TcpClient::onWrite, this, _1 ));
     conn->setCloseCallBack( std::bind( &TcpClient::onRemoveConnection, this, _1 ));
 
-    onConn();
 
     conn->onConnFinish();
 
@@ -93,30 +96,12 @@ void TcpClient::onNewConn( int fd, struct sockaddr_in& addr  )
 
 void TcpClient::onRemoveConnection( Connection* conn )
 {
-
+    closeCallBack_( this );
+    conn->onConnDestory();
+    TINY_DELETE( conn );
 }
 
-void TcpClient::onRead( Connection* conn  )
-{
-    LOG_INFO("on read ");
-}
 
-void TcpClient::onWrite( Connection* conn )
-{
-
-    LOG_INFO("on write ");
-}
-
-void TcpClient::onClose( Connection* conn )
-{
-
-    LOG_INFO("on close ");
-}
-
-void TcpClient::onConn()
-{
-    LOG_INFO("on conn ");
-}
 
 
 

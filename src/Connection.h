@@ -18,6 +18,7 @@ class Connection;
 typedef std::function< void  ( Connection* ) > ReadCallBack;
 typedef std::function< void  ( Connection* ) > WriteCallBack;
 typedef std::function< void  ( Connection* ) > CloseCallBack;
+typedef std::function< void  ( Connection* ) > ConnCallBack;
 
 enum ConnectionState
 {
@@ -47,14 +48,19 @@ public:
     static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 public:
 
-    void         setReadCallBack ( const  ReadCallBack&  cb ) { readCallback_  = cb; }
-    void         setWriteCallBack( const  WriteCallBack& cb ) { writeCallback_ = cb; }
-    void         setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
+    void    setReadCallBack ( const  ReadCallBack&  cb ) { readCallback_  = cb; }
+    void    setWriteCallBack( const  WriteCallBack& cb ) { writeCallback_ = cb; }
+    void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
+    void    setConnCallback(const ConnCallBack* cb ) { connCallBack_ = cb; }
+
+    bool    isConnected() const { return state_ == CS_Connected;  }
+
 private:
     ConnectionState  state_;
-    ReadCallBack           readCallback_;
-    WriteCallBack          writeCallback_;
-    CloseCallBack          closeCallBack_;
+    ReadCallBack            readCallback_;
+    WriteCallBack           writeCallback_;
+    CloseCallBack           closeCallBack_;
+    ConnCallBack            connCallBack_;
     EventIo                 ev_;
 
     static const size_t kBufSize = 1024*4;

@@ -106,32 +106,24 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
     conn->setReadCallBack( readCallBack_ );
     conn->setWriteCallBack( writeCallback_ );
     conn->setCloseCallBack( std::bind( &TcpServer::onRemoveConnection, this, _1 ));
+    conn->setConnCallback( connCallBack_ );
 
     connectionList_.push_back( conn );
 
     conn->onConnFinish();
-
-    onConnection( conn );
 
     return ;
 }
 
 void TcpServer::onRemoveConnection( Connection* conn )
 {
-    closeCallBack_( conn );
-
+    closeCallBack_( this );
     //should map?
+    conn->onConnDestory();
     LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());
     std::remove(connectionList_.begin(),connectionList_.end(),conn );
     TINY_DELETE( conn );
     return;
-}
-
-
-int TcpServer::onConnection( Connection* conn )
-{
-    LOG_INFO(" receive new connection %d ", conn->getSockFd() );
-    return 1;
 }
 
 

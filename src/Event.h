@@ -103,7 +103,7 @@ public:
     //tiny_forceinline    void setEvents( int flag ) { events_ = flag; }
     tiny_forceinline    int getEvents()   const { return events_; }
     tiny_forceinline    bool isReading() const { return events_&EV_READ;   }
-    tiny_forceinline    bool isWriting() const { return events_&EV_WRITE; }
+    tiny_forceinline    bool isWriteing() const { return events_&EV_WRITE; }
     tiny_forceinline    bool changeEvents( int events );
 
 

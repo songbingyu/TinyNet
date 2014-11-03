@@ -5,8 +5,20 @@
 #ifndef _SOCKET_HELPER_H_
 #define _SOCKET_HELPER_H_
 
+#include "TinyDefine.h"
 
 struct sockaddr_in;
+
+namespace SocketUtils
+{
+    inline uint64_t hostToNet64( uint64_t host64 )
+    {
+        htobe64()
+    }
+}// SocketUtils
+
+
+
 
 //socket op wraper.
 class   SocketHelper

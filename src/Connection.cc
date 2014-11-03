@@ -25,6 +25,41 @@ Connection::~Connection()
 void Connection::send( char* data, int len )
 {
     if( state_ != CS_Connected ) return;
+    int nwrite = 0;
+    int remaining = len;
+    int writeError = false;
+
+
+    if(  !ev_.isWriteing() && writeBuf_.capacity() ==0 ){
+        nwrite = socketHelper_->write( sockfd_, data, len );
+        if( nwrite >= 0  ){
+            remaining = remaining - nwrite;
+            if( remaining == 0 ){
+                //Fixme: should callback?
+            }
+        }else {
+            nwrite = 0;
+            if( errno != EWOULDBLOCK ){
+                if( errno == EPIPE || errno == ECONNRESET ){
+                    writeError = true;
+                }
+            }
+        }
+    }
+
+    if( remaining > 0 && !writeError ){
+        int oldLen = writeBuf_.capacity();
+        if( oldLen + remaining > writeBuf_.size() ){
+            //Fixme : over
+            LOG_ERROR("connection socket buff over, fd:%d ,events:%d", sockfd_, ev_.getEvents() );
+        }
+
+        writeBuf_.push( data+nwrite, remaining );
+
+        if( !ev_.isWriteing() ){
+            ev_.changeEvents( ev_.getEvents()&EV_WRITE );
+        }
+    }
 
 }
 
@@ -52,7 +87,10 @@ int  Connection::onRead( )
 
 int  Connection::onWrite( )
 {
-    writeCallback_(this);
+    if( ev_.isWriteing() ){
+
+    }
+    //writeCallback_(this);
     return 1;
 }
 

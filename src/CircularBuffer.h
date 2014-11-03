@@ -9,62 +9,114 @@
 
 // Fixme: consider other way?
 //
-template < typename  T, size_t N   >
+template < size_t N >
 class  CircularBuffer
 {
 public:
-    CircularBuffer( ): begin_(0), end_( begin_ ),size_( 0 ), data_( NULL )
+    CircularBuffer( ): begin_(0), end_( begin_ ), count_(0), size_( 0 ), data_( NULL )
     {
 #ifdef  _DEBUG_
         assert( N > 0 );
 #endif
-        data_  = new T[N];
+        data_  = new char[N];
         size_   = N;
     }
 
-   ~CircularBuffer()
+    ~CircularBuffer()
     {
         delete data_;
         data_  = NULL;
         begin_ = 0;
         end_   = 0;
+        count_ = 0;
         size_  = 0;
     }
 
 public:
-   int      size()      {  return   size_; }
-   int      capacity()  {  return   end_ >= begin_ ?  end_ - begin_ : end_ + size_ - begin_;  }
-   int      freeSize()  {  return   size_ - capacity();    }
+    int      size()      {  return   size_; }
+    int      capacity()  {  return   count_; }
+    int      freeSize()  {  return   size_ - count_;    }
+    void retrieveAll()
+    {
+        end_ = begin_ = 0;
+    }
 
-   bool     push( T*  data, int  count, bool isOver = false  )
-   {
-        if( ( end_ + count )% size_ >= begin_ )
-        {
-                LOG_ERROR(" circual buffer is over ");
-                return false;
+    void retrieve( int len )
+    {
+        tiny_assert( len <= capacity() );
+        if(capacity() < len ){
+            end_ = ( end_ + len )%size_;
+        }else{
+            retrieveAll();
+        }
+    }
+
+    void retrieveInt64()
+    {
+        retrieve(sizeof(int64_t));
+    }
+
+    void retrieveInt32()
+    {
+        retrieve(sizeof(int32_t));
+    }
+
+    void retrieveInt8()
+    {
+        retrieve(sizeof(int8));
+    }
+
+    void append( char* data, int len )
+    {
+        tiny_assert( len !=0 && NULL != data );
+
+        if( freeSize() < len ){
+            //Fixme:should clear?
+            LOG_ERROR("buffer is over ....");
+            return;
         }
 
-        if( end_ >= begin_ )
+        if( end_ > begin_ ){
+            if( len_ > ( size_ - end_ ) ){
+                memcpy( data_+end_, data, size_-end_ );
+                memcpy( data_, data_+size_-end_, len-(size_-end_) );
+            }else{
+                memcpy( data_+end_, data, len );
+            }
+        }else{
+            memcpy( data_+end_, data, len );
+        }
+        end_ = ( end_ + len )%size_;
+        count_ += len;
+    }
+
+    bool  peek( char* buf, int cnt )
+    {
+        tiny_assert( NULL!= buf && cnt >=0 );
+
+        if( capacity() < cnt  )  return false;
+
+        if( end_ <  begin_  )
         {
-            if( count > ( size_ - end_ ) )
+            if( cnt > (size_ - begin_) )
             {
-                memcpy( data_+ end_, data, ( size_ -  end_ )*sizeof(T) );
-                memcpy( data_, data, ( count - size_ +  end_ )*sizeof(T) );
+                memcpy( buf, data_ + begin_, ( size_ - begin_ ) );
+                memcpy( buf, data_, ( cnt - (size_ - begin_ ) ) );
             }
             else
             {
-                memcpy( data_ + end_, data, count*sizeof(T) );
+                memcpy( buf, data_ + begin_, cnt );
             }
-
-        }
-        else
-        {
-            memcpy( data_ + end_, data_, count*sizeof(T));
+        }else{
+            memcpy(buf, data_+ begin_, cnt);
         }
 
-        end_ = ( end_ + count )% size_;
-        return true;
-   }
+        begin_ = ( begin_ + cnt)% size_;
+        count_ -= cnt;
+        return ;
+    }
+
+
 
     int     push( SocketHelper* socketHelper, int fd )
     {
@@ -87,38 +139,12 @@ public:
             return 0;
     }
 
-    bool    pop( char* buf, int cnt )
-    {
-
-            if( capacity() < cnt  )  return false;
-
-            if( end_ <=  begin_  )
-            {
-                if( cnt > (size_ - begin_) )
-                {
-                    memcpy( buf, data_ + begin_, ( size_ - begin_ )*sizeof(T) );
-                    memcpy( buf, data_, ( cnt - (size_ - begin_ )*sizeof(T)));
-                }
-                else
-                {
-                    memcpy( buf, data_ + begin_,  cnt*sizeof(T));
-                }
-            }
-            else
-            {
-                memcpy(buf, data_+ begin_, cnt*sizeof(T));
-            }
-
-            begin_ = ( begin_ + cnt)% size_;
-            return true;
-    }
-
 private:
-
     size_t   begin_;
     size_t   end_;
+    size_t   count_;
     size_t   size_;
-    T*       data_;
+    char*    data_;
 };
 
 

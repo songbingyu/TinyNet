@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include "Connector.h"
-#include "Connection.h"
 #include "EventLoop.h"
 
 using namespace std::placeholders;
@@ -85,8 +84,8 @@ void TcpClient::onNewConn( int fd, struct sockaddr_in& addr  )
 
     Connection* conn  = new Connection( fd, loop_, addr );
 
-    conn->setReadCallBack( std::bind( &TcpClient::onRead, this, _1 ) );
-    conn->setWriteCallBack( std::bind( &TcpClient::onWrite, this, _1 ));
+    conn->setReadCallBack( readCallBack_  );
+    //conn->setWriteCallBack( std::bind( &TcpClient::onWrite, this, _1 ));
     conn->setCloseCallBack( std::bind( &TcpClient::onRemoveConnection, this, _1 ));
 
 
@@ -96,7 +95,7 @@ void TcpClient::onNewConn( int fd, struct sockaddr_in& addr  )
 
 void TcpClient::onRemoveConnection( Connection* conn )
 {
-    closeCallBack_( this );
+    closeCallBack_(conn);
     conn->onConnDestory();
     TINY_DELETE( conn );
 }

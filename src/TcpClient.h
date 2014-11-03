@@ -6,12 +6,12 @@
 #ifndef     _TCP_CLIENT_H_
 #define     _TCP_SERVER_H_
 
+#include "Connection.h"
 #include <string>
 #include "TinyDefine.h"
 
 class EventLoop;
 class Connector;
-class Connection;
 struct sockaddr_in;
 
 class    TcpClient

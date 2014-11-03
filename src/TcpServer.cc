@@ -117,7 +117,7 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
 
 void TcpServer::onRemoveConnection( Connection* conn )
 {
-    closeCallBack_( this );
+    closeCallBack_( conn );
     //should map?
     conn->onConnDestory();
     LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());

@@ -51,7 +51,7 @@ public:
     void    setReadCallBack ( const  ReadCallBack&  cb ) { readCallback_  = cb; }
     void    setWriteCallBack( const  WriteCallBack& cb ) { writeCallback_ = cb; }
     void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
-    void    setConnCallback(const ConnCallBack* cb ) { connCallBack_ = cb; }
+    void    setConnCallback(const ConnCallBack& cb ) { connCallBack_ = cb; }
 
     bool    isConnected() const { return state_ == CS_Connected;  }
 

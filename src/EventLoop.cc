@@ -13,7 +13,7 @@
 EventLoop::EventLoop(): isRuning_( true ), curPid_(0), signalHelper_(this)
 {
     poller_ = getRecommendedPoller();
-
+    curTime_ = tinyGetTime();
     timers_.push_back( NULL );
 }
 
@@ -142,6 +142,9 @@ void EventLoop::delActiveFdEvent( EventIo* ev )
 
 void EventLoop::addTimer( EventTimer* ev )
 {
+    if( ev->getActive()+1 > getTimerCount() ){
+        timers_.resize( ev->getActive()+1 , NULL );
+    }
     timers_[ ev->getActive() ] = ( TimerEventList* )ev;
 
     Tiny::upHeap( timers_, ev->getActive() );
@@ -269,14 +272,12 @@ void EventLoop::timersReify()
                 ev->setAt( ev->getAt() + ev->getRepeat() );
                 if( ev->getAt() < curTime_ ){
                     ev->setAt( curTime_ );
-
-                    Tiny::downHeap( timers_, getTimerCount(), kHeap0 );
-                } else {
-                    ev->stop();
                 }
-
-                addFeedReverse( (IEvent*)ev );
+                Tiny::downHeap( timers_, getTimerCount(), kHeap0 );
+            } else {
+                ev->stop();
             }
+            addFeedReverse( (IEvent*)ev );
         }while( getTimerCount() && timers_[kHeap0]->getAt() < curTime_ );
 
         feedReverseDone( EV_TIMER );

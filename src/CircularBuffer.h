@@ -27,7 +27,7 @@ public:
 
     ~CircularBuffer()
     {
-        delete data_;
+        delete []data_;
         data_  = NULL;
         begin_ = 0;
         end_   = 0;
@@ -109,7 +109,7 @@ public:
 
         if( end_ <  begin_  )
         {
-            if( cnt > (size_ - begin_) )
+            if( cnt > (int)(size_ - begin_) )
             {
                 memcpy( buf, data_ + begin_, ( size_ - begin_ ) );
                 memcpy( buf, data_, ( cnt - (size_ - begin_ ) ) );
@@ -124,7 +124,7 @@ public:
 
         // begin_ = ( begin_ + cnt)% size_;
         //count_ -= cnt;
-        return ;
+        return true;
     }
 
     bool peekInt64() const
@@ -157,6 +157,13 @@ public:
         int8_t be8;
         peek( (char*)&be8, sizeof(int8_t) );
         return be8;
+    }
+
+    void read( char* data, int len )
+    {
+        peek( data, len );
+        retrieve( len );
+        return;
     }
 
     int64_t readInt64()

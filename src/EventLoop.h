@@ -63,8 +63,8 @@ private:
      tiny_forceinline   void updateTime( Timestamp maxBlockTime );
      tiny_noinline tiny_cold void timerReSchedule( Timestamp adjust );
      tiny_forceinline   void timersReify();
-private:
 
+private:
     typedef  std::vector<PendingEvent*>   PendingArr;
     PendingArr          pendingEvents_;
     bool                isRuning_;

@@ -18,8 +18,7 @@ Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IC
 
 Connection::~Connection()
 {
-
-
+    close();
 }
 
 void Connection::send( char* data, int len )
@@ -67,7 +66,7 @@ void Connection::close()
 {
     if( state_ == CS_Connecing || state_ == CS_Connected ){
         state_ = CS_DisConnecting;
-            onClose();
+        onClose();
     }
 }
 
@@ -130,6 +129,7 @@ int  Connection::onConnFinish()
 int Connection::onConnDestory()
 {
     if( state_ == CS_Connected ){
+
         state_ = CS_DisConnected;
         ev_.stop();
     }

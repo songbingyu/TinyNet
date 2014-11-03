@@ -28,6 +28,7 @@ public:
         socketHelper_->close( sockfd_ );
         sockfd_ = -1;
         loop_   = NULL;
+
         delete socketHelper_;
         socketHelper_ =  NULL;
     }

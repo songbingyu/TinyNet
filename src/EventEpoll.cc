@@ -24,7 +24,6 @@ EventEpoll::EventEpoll( EventLoop* loop ): IPoller( loop ), epollfd_( -1 ),epoll
 
 EventEpoll::~EventEpoll()
 {
-
     close( epollfd_ );
 }
 

@@ -98,6 +98,8 @@ const static int kHeap0 = 1;
 extern Timestamp  tinyGetTime();
 extern void tinySleep( Timestamp t );
 extern void fdInteral( int fd );
+
+
 #endif
 
 

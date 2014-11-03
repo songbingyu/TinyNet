@@ -27,8 +27,7 @@ public:
 
     ~CircularBuffer()
     {
-        delete []data_;
-        data_  = NULL;
+        TINY_DELETE( data_ );
         begin_ = 0;
         end_   = 0;
         count_ = 0;

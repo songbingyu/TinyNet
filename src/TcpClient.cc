@@ -22,7 +22,7 @@ TcpClient::TcpClient( EventLoop*  loop, const char* ip, int port ): loop_(loop),
 TcpClient::~TcpClient()
 {
     TINY_DELETE( connector_ );
-    TINY_DELETE(conn_);
+    assert( NULL == conn_ );
 }
 
 void TcpClient::init()

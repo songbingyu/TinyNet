@@ -10,20 +10,45 @@
 #include "ActiveEvent.h"
 #include "PendingEvent.h"
 
-EventLoop::EventLoop(): isRuning_( true ), curPid_(0), signalHelper_(this)
+EventLoop::EventLoop(): isRuning_( true ), curPid_(0),
+                        activeCnt_(0),ioBlockTime_(0),signalHelper_(this)
 {
     poller_ = getRecommendedPoller();
     curTime_ = tinyGetTime();
+    //占位
     timers_.push_back( NULL );
 }
 
 EventLoop::~EventLoop()
 {
+    isRuning_ = false;
+
     TINY_DELETE( poller_ );
+
+    PendingArr::iterator it = pendingEvents_.begin();
+    for( ; it != pendingEvents_.end(); ++it ){
+        delete *it;
+    }
     pendingEvents_.clear();
-    activeFdEvents_.clear();
+
+    {
+        ActiveFdArr::iterator it = activeFdEvents_.begin();
+        for( ; it!= activeFdEvents_.begin(); ++it ){
+            delete *it;
+        }
+        activeFdEvents_.clear();
+    }
+
     changeFds_.clear();
-    timers_.clear();
+
+    {
+        HeapVec::iterator it = timers_.begin();
+        for( ; it != timers_.end(); ++it ){
+            delete *it;
+        }
+        timers_.clear();
+    }
+
     rFeeds_.clear();
 }
 

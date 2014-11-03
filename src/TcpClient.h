@@ -17,7 +17,7 @@ struct sockaddr_in;
 class    TcpClient
 {
 public:
-    TcpClient( const char* ip, int port );
+    TcpClient( EventLoop* loop,  const char* ip, int port );
     ~TcpClient();
 public:
     void init( );
@@ -31,19 +31,21 @@ public:
 
     void    setReadCallBack( const ReadCallBack& cb ) { readCallBack_ = cb; }
     void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
+    void    setConnCallBack( const ConnCallBack& cb ) { connCallBack_ = cb; }
 
 private:
 
+    EventLoop*  loop_;
     std::string serverIp_;
     int         serverPort_;
 
-    EventLoop*  loop_;
     bool        isConnect_;
     Connector*  connector_;
     Connection* conn_;
 
     ReadCallBack    readCallBack_;
     CloseCallBack   closeCallBack_;
+    ConnCallBack    connCallBack_;
 
 };
 

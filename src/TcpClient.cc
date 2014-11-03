@@ -13,7 +13,7 @@
 
 using namespace std::placeholders;
 
-TcpClient::TcpClient( const char* ip, int port ): serverIp_( ip ), serverPort_( port )
+TcpClient::TcpClient( EventLoop*  loop, const char* ip, int port ): loop_(loop), serverIp_( ip ), serverPort_( port )
 {
 
 
@@ -23,8 +23,6 @@ TcpClient::~TcpClient()
 {
     TINY_DELETE( connector_ );
     TINY_DELETE(conn_);
-    TINY_DELETE( loop_ );
-
 }
 
 void TcpClient::init()
@@ -41,7 +39,7 @@ void TcpClient::init()
     }
 
 
-    loop_ = new EventLoop();
+    //loop_ = new EventLoop();
     assert( loop_ != NULL );
 
     connector_ = new Connector( loop_, addr );
@@ -69,6 +67,7 @@ void TcpClient::disconnect()
     if( NULL != conn_ && conn_->isConnected() )
     {
         conn_->close();
+        conn_ = NULL;
     }
 }
 
@@ -85,11 +84,14 @@ void TcpClient::onNewConn( int fd, struct sockaddr_in& addr  )
     Connection* conn  = new Connection( fd, loop_, addr );
 
     conn->setReadCallBack( readCallBack_  );
+    conn->setConnCallBack( connCallBack_ );
     //conn->setWriteCallBack( std::bind( &TcpClient::onWrite, this, _1 ));
     conn->setCloseCallBack( std::bind( &TcpClient::onRemoveConnection, this, _1 ));
 
 
     conn->onConnFinish();
+
+    conn_= conn;
 
 }
 
@@ -98,6 +100,7 @@ void TcpClient::onRemoveConnection( Connection* conn )
     closeCallBack_(conn);
     conn->onConnDestory();
     TINY_DELETE( conn );
+    conn_ = NULL;
 }
 
 

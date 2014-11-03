@@ -156,6 +156,8 @@ void  EventLoop::delTimer( EventTimer* ev )
         timers_[ ev->getActive() ] = timers_[ getTimerCount() + kHeap0 -1 ];
         timers_.pop_back();
         Tiny::adjustHeap( timers_, getTimerCount(), ev->getActive() );
+    }else {
+        timers_.pop_back();
     }
 }
 

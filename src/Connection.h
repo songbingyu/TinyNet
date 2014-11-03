@@ -20,6 +20,10 @@ typedef std::function< void  ( Connection* ) > WriteCallBack;
 typedef std::function< void  ( Connection* ) > CloseCallBack;
 typedef std::function< void  ( Connection* ) > ConnCallBack;
 
+const size_t kBufSize = 1024*4;
+
+typedef CircularBuffer<kBufSize> Buffer;
+
 enum ConnectionState
 {
     CS_No,
@@ -44,14 +48,19 @@ public:
 public:
     void    send( char* data, int len );
     void    close();
+    void    setTcpNoDelay() { socketHelper_->setTcpNoDelay( sockfd_,false ); }
 public:
     static void onEvents( EventLoop* loop, IEvent* ev, int revents );
+
 public:
 
     void    setReadCallBack ( const  ReadCallBack&  cb ) { readCallback_  = cb; }
     void    setWriteCallBack( const  WriteCallBack& cb ) { writeCallback_ = cb; }
     void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
-    void    setConnCallback(const ConnCallBack& cb ) { connCallBack_ = cb; }
+    void    setConnCallBack(const ConnCallBack& cb ) { connCallBack_ = cb; }
+
+    Buffer* getReadBuffer() { return &readBuf_; }
+    Buffer* getWriteBuffer() { return &writeBuf_; }
 
     bool    isConnected() const { return state_ == CS_Connected;  }
 
@@ -63,9 +72,9 @@ private:
     ConnCallBack            connCallBack_;
     EventIo                 ev_;
 
-    static const size_t kBufSize = 1024*4;
-    CircularBuffer<kBufSize>    readBuf_;
-    CircularBuffer<kBufSize>    writeBuf_;
+    Buffer  readBuf_;
+    Buffer  writeBuf_;
+
 };
 
 #endif // _CONNECTION_H_

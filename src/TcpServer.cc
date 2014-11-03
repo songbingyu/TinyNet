@@ -106,7 +106,7 @@ void  TcpServer::onNewConnection( int*  fd, struct sockaddr_in* addr )
     conn->setReadCallBack( readCallBack_ );
     conn->setWriteCallBack( writeCallback_ );
     conn->setCloseCallBack( std::bind( &TcpServer::onRemoveConnection, this, _1 ));
-    conn->setConnCallback( connCallBack_ );
+    conn->setConnCallBack( connCallBack_ );
 
     connectionList_.push_back( conn );
 

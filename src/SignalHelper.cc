@@ -67,7 +67,7 @@ namespace Tiny
         }
 
         int fds[2];
-        if( pipe( evPipe_ )== -1  ){
+        if( pipe( fds )== -1  ){
 
             perror("pipe");
             exit(0);

@@ -216,7 +216,7 @@ public:
     int32_t flushFd( SocketHelper* socketHelper_, int fd )
     {
         tiny_assert( capacity() > 0  );
-#ifdef _DEBUD_
+#ifdef _DEBUG_
         char* sendBuf = new char[ capacity()];
         peek( sendBuf, capacity() );
 

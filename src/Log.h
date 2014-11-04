@@ -38,7 +38,7 @@ public :
     void    static  WriteLog(const char* logLevel,const  char* file, const int  line,  const char* fmt , ...  )
     {
 
-            char  buf[ MAX_LOG_LEN ] = { 0 };
+           /* char  buf[ MAX_LOG_LEN ] = { 0 };
             char  logbuf[ 512 ]      = { 0 };
 
             struct timeval tv;
@@ -58,7 +58,7 @@ public :
             strcat( buf, logbuf );
             strcat( buf, "\n"   );
             printf( buf );
-            fflush(stdout);
+            flush(stdout);*/
     }
 
 };

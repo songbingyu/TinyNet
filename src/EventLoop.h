@@ -55,8 +55,8 @@ public:
      tiny_forceinline Timestamp   getNowTime() const  { return curTime_; }
      tiny_forceinline int         getTimerCount()     { return timers_.size() - 1; }
      tiny_forceinline void  setIoBlockTime( Timestamp interval ) { ioBlockTime_ = interval; }
-     void invokePending();
-     tiny_forceinline   bool addChangeFd( int fd, int flags );
+     tiny_forceinline void invokePending();
+     bool addChangeFd( int fd, int flags );
 private:
      IPoller* getRecommendedPoller();
      tiny_forceinline   void fdReify();

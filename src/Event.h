@@ -31,7 +31,7 @@ protected:
         data_       = NULL;
     }
 public:
-    tiny_forceinline void   onEvent(int revents );
+    void   onEvent(int revents );
     tiny_forceinline void   ev_start( int active );
     tiny_forceinline void   ev_stop();
     tiny_forceinline bool   isActive() const { return active_ > 0 ; }

@@ -49,9 +49,9 @@ public:
 
     }
 public:
-    tiny_forceinline void addList( EventList* el );
-    tiny_forceinline void delList( EventList* el );
-    tiny_forceinline void addFeedEvent();
+    void addList( EventList* el );
+    void delList( EventList* el );
+    void addFeedEvent();
 public:
     EventList*  head_;
     EventLoop*  loop_;

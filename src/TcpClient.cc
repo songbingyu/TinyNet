@@ -13,7 +13,9 @@
 
 using namespace std::placeholders;
 
-TcpClient::TcpClient( EventLoop*  loop, const char* ip, int port ): loop_(loop), serverIp_( ip ), serverPort_( port )
+TcpClient::TcpClient( EventLoop*  loop, const char* ip, int port ): loop_(loop),
+                                                                    serverIp_( ip ), serverPort_( port ),
+                                                                    conn_(NULL)
 {
 
 
@@ -22,7 +24,6 @@ TcpClient::TcpClient( EventLoop*  loop, const char* ip, int port ): loop_(loop),
 TcpClient::~TcpClient()
 {
     TINY_DELETE( connector_ );
-    assert( NULL == conn_ );
 }
 
 void TcpClient::init()
@@ -37,7 +38,6 @@ void TcpClient::init()
         exit(1);
         return;
     }
-
 
     //loop_ = new EventLoop();
     assert( loop_ != NULL );
@@ -82,6 +82,7 @@ void TcpClient::onNewConn( int fd, struct sockaddr_in& addr  )
 {
 
     Connection* conn  = new Connection( fd, loop_, addr );
+    tiny_assert( NULL != conn );
 
     conn->setReadCallBack( readCallBack_  );
     conn->setConnCallBack( connCallBack_ );

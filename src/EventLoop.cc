@@ -17,6 +17,10 @@ EventLoop::EventLoop(): isRuning_( true ), curPid_(0),
     curTime_ = tinyGetTime();
     //占位
     timers_.push_back( NULL );
+    pendingEvents_.reserve( 1000 );
+    changeFds_.reserve(1000);
+    activeFdEvents_.reserve( 2000);
+
 }
 
 EventLoop::~EventLoop()
@@ -111,7 +115,7 @@ int  EventLoop::run( int flags )
 
         }
     }while( expect_true( activeCnt_ &&
-                !( flags & ( EVRUN_ONCE|EVRUN_NOWAIT )) ));
+                !( flags & ( EVRUN_ONCE )) ));
 
    return  activeCnt_;
 

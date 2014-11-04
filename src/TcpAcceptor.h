@@ -27,7 +27,7 @@ public:
     int     onRead( );
     void    setNewConnectionCallBack( NewConnectionCallBack* cb ) { newConnCallBack_ = cb; }
     int     bindAndListen( );
-    bool    isListen() {  return isListening_ == true;  }
+    bool    isListen() const  {  return isListening_ == true;  }
 public:
     static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 private:

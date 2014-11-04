@@ -35,7 +35,7 @@ public:
 
 public :
 
-    void    static  WriteLog(const char* logLevel,const  char* file, const int  line,  const char* fmt , ...  )
+    static void WriteLog(const char* logLevel,const  char* file, const int  line,  const char* fmt , ...  )
     {
 
            /* char  buf[ MAX_LOG_LEN ] = { 0 };

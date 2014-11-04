@@ -23,7 +23,6 @@ TcpAcceptor::TcpAcceptor( int fd, EventLoop* loop, struct sockaddr_in&  addr ): 
 {
 
     bindAndListen();
-    enableRead();
 }
 
 

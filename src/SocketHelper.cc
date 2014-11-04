@@ -183,7 +183,7 @@ int SocketHelper::getSocketError( int fd  )
 struct sockaddr_in SocketHelper::getLocalAddr( int fd )
 {
     struct sockaddr_in local;
-    bzero( &local, sizeof(local) );
+    memset(&local, 0, sizeof(local) );
     socklen_t len = (socklen_t)sizeof( local );
 
     if( getsockname( fd, ( struct sockaddr* )&local, &len ) ){
@@ -196,7 +196,8 @@ struct sockaddr_in SocketHelper::getLocalAddr( int fd )
 struct sockaddr_in SocketHelper::getPeerAddr( int fd )
 {
     struct sockaddr_in peer;
-    bzero( &peer, sizeof(peer) );
+    memset( &peer, 0, sizeof(peer) );
+
     socklen_t len = (socklen_t)sizeof( peer );
 
     if( getpeername( fd, ( struct sockaddr*)&peer, &len ) ){

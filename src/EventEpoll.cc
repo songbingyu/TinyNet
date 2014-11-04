@@ -65,7 +65,7 @@ void  EventEpoll::updateEvent( int fd, int oev, int nev )
     if( !nev )   return;
 
     struct epoll_event  ev;
-    bzero( &ev, sizeof(ev) );
+    memset( &ev, 0, sizeof(ev) );
 
     ActiveFdEvent*  activeEv  = loop_->getActiveFdEventByFd( fd );
     int oldRevents = activeEv->revents_;

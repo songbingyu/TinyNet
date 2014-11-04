@@ -51,7 +51,7 @@ int TcpServer::init( )
     assert( port_  >= 1024 );
 
     struct sockaddr_in addr;
-    bzero( &addr, sizeof(addr) );
+    memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl( INADDR_ANY );
     addr.sin_port = htons( port_ );
@@ -121,7 +121,7 @@ void TcpServer::onRemoveConnection( Connection* conn )
     //should map?
     conn->onConnDestory();
     LOG_INFO("remove socket from connectionlist :%d ", conn->getSockFd());
-    std::remove(connectionList_.begin(),connectionList_.end(),conn );
+    connectionList_.remove( conn );
     TINY_DELETE( conn );
     return;
 }

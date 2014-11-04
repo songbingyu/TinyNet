@@ -69,7 +69,8 @@ protected:
 class TimerEventList : public IEvent
 {
 public:
-    TimerEventList( EventLoop* loop, EVENT_CB cb, Timestamp after ) : IEvent( loop, cb ), at_(after)
+    TimerEventList( EventLoop* loop, EVENT_CB cb, Timestamp after ) : IEvent( loop, cb ), at_(after),
+                                                                    next_(NULL)
     {
 
     }

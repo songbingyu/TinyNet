@@ -9,11 +9,11 @@
 #include <assert.h>
 #include "ByteOrder.h"
 #include "Log.h"
-
+#include "nocopyable.h"
 
 //is not a best way?
 template < size_t N >
-class  CircularBuffer
+class  CircularBuffer:public nocopyable
 {
 public:
     CircularBuffer(): begin_(0), end_( begin_ ), count_(0), size_( 0 ), data_( NULL )
@@ -27,7 +27,8 @@ public:
 
     ~CircularBuffer()
     {
-        TINY_DELETE( data_ );
+        delete []data_;
+        data_ = NULL;
         begin_ = 0;
         end_   = 0;
         count_ = 0;
@@ -35,9 +36,9 @@ public:
     }
 
 public:
-    int      size()      {  return   size_; }
-    int      capacity()  {  return   count_; }
-    int      freeSize()  {  return   size_ - count_;    }
+    int      size()   const    {  return   size_; }
+    int      capacity()  const {  return   count_; }
+    int      freeSize()  const {  return   size_ - count_;    }
 
     void retrieveAll()
     {
@@ -111,7 +112,7 @@ public:
             if( cnt > (int)(size_ - begin_) )
             {
                 memcpy( buf, data_ + begin_, ( size_ - begin_ ) );
-                memcpy( buf, data_, ( cnt - (size_ - begin_ ) ) );
+                memcpy( buf + size_ - begin_, data_, ( cnt - (size_ - begin_ ) ) );
             }
             else
             {

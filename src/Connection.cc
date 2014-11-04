@@ -11,7 +11,8 @@
 
 
 Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IConnection( fd, loop ),
-                                                                        ev_(loop,Connection::onEvents, fd, EV_READ )
+                                                                            state_(CS_DisConnected),
+                                                                            ev_(loop,Connection::onEvents, fd, EV_READ )
 {
 
 }

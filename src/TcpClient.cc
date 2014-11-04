@@ -15,6 +15,8 @@ using namespace std::placeholders;
 
 TcpClient::TcpClient( EventLoop*  loop, const char* ip, int port ): loop_(loop),
                                                                     serverIp_( ip ), serverPort_( port ),
+                                                                    isConnect_(false),
+                                                                    connector_(NULL),
                                                                     conn_(NULL)
 {
 
@@ -30,12 +32,11 @@ void TcpClient::init()
 {
 
     struct sockaddr_in addr;
-    bzero( &addr, sizeof(addr) );
+    memset( &addr, 0, sizeof(addr) );
     addr.sin_family = AF_INET;
     addr.sin_port = htons( serverPort_ );
     if( inet_pton( AF_INET, serverIp_.c_str(), &addr.sin_addr ) <= 0 ){
         LOG_ERROR(" inet pton error, src:%s ", serverIp_.c_str() );
-        exit(1);
         return;
     }
 

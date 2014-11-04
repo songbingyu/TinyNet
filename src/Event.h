@@ -104,7 +104,8 @@ public:
     tiny_forceinline    int getEvents()   const { return events_; }
     tiny_forceinline    bool isReading() const { return events_&EV_READ;   }
     tiny_forceinline    bool isWriteing() const { return events_&EV_WRITE; }
-    tiny_forceinline    bool changeEvents( int events );
+
+    bool changeEvents( int events );
 
 
 public:

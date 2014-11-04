@@ -47,7 +47,7 @@ public:
     void retrieve( int len )
     {
         tiny_assert( len <= capacity() );
-        if(capacity() < len ){
+        if( len < capacity() ){
             end_ = ( end_ + len )%size_;
             count_ += len;
         }else{

@@ -11,6 +11,7 @@
 #include "IConnection.h"
 #include "CallBackDelegate.h"
 #include "CircularBuffer.h"
+#include "SimpleBuffer.h"
 
 class EventLoop;
 class Connection;
@@ -22,7 +23,11 @@ typedef std::function< void  ( Connection* ) > ConnCallBack;
 
 const size_t kBufSize = 1024*4;
 
+#ifdef USE_CIRCULAR_BUFFER
 typedef CircularBuffer<kBufSize> Buffer;
+#else
+typedef SimpleBuffer             Buffer;
+#endif
 
 enum ConnectionState
 {

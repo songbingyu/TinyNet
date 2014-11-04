@@ -89,6 +89,11 @@ int SocketHelper::read( int fd, char* buf, int count )
 
 }
 
+int SocketHelper::readv( int fd, const struct iovec* iov, int iovcnt  )
+{
+    return ::readv( fd, iov, iovcnt );
+}
+
 int SocketHelper::write( int fd, char* buf, int count )
 {
     //TODO:writev ?

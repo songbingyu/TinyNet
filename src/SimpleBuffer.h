@@ -7,6 +7,7 @@
 
 #include <errno.h>
 #include <vector>
+#include <sys/uio.h>
 #include "ByteOrder.h"
 #include "Log.h"
 
@@ -14,7 +15,7 @@
 class  SimpleBuffer
 {
 public:
-    static const kInitSize=1024*4;
+    static const int  kInitSize=1024*4;
 public:
     SimpleBuffer(): buffer_(1024*4),begin_(0), end_( begin_ )
     {
@@ -23,17 +24,14 @@ public:
 
     ~SimpleBuffer()
     {
-        TINY_DELETE( data_ );
         begin_ = 0;
         end_   = 0;
-        count_ = 0;
-        size_  = 0;
     }
 
 public:
-    int      size()      {  return   buffer.size(); }
-    int      capacity()  {  return   end_ - begin_ ; }
-    int      freeSize()  {  return   buffer_.size() - end_ ;    }
+    int      size() const      {  return   buffer_.size(); }
+    int      capacity() const  {  return   end_ - begin_ ; }
+    int      freeSize() const  {  return   buffer_.size() - end_ ;    }
 
     void retrieveAll()
     {
@@ -85,8 +83,9 @@ public:
 
     bool hasWritten( size_t len )
     {
-        tiny_assert( len < freeSize() );
+        tiny_assert( len < (size_t)freeSize() );
         end_ += len;
+        return true;
     }
 
     char* peek() { return begin() + begin_; }
@@ -95,37 +94,37 @@ public:
     {
 
         tiny_assert( cnt <= capacity() );
-        memcpy( buf, peek(), cnt );
+        memcpy( buf, begin() + begin_, cnt );
         return true;
     }
 
-    bool peekInt64() const
+    bool peekInt64()
     {
-        tiny_asssert( capacity() >= sizeof(int64_t) );
+        tiny_assert( capacity() >= (int)sizeof(int64_t) );
         int64_t be64 = 0;
         peek( (char*)&be64, sizeof(int64_t) );
         return ByteOrder::netToHost64(be64);
     }
 
-    bool peekInt32() const
+    bool peekInt32()
     {
-        tiny_assert( capacity() >= sizeof(int32_t) );
+        tiny_assert( capacity() >= (int)sizeof(int32_t) );
         int32_t be32 = 0;
         peek( (char*)&be32, sizeof(int32_t) );
         return ByteOrder::netToHost32(be32);
     }
 
-    bool peekInt16() const
+    bool peekInt16()
     {
-        tiny_assert( capacity() >= sizeof(int16_t) );
+        tiny_assert( capacity() >= (int)sizeof(int16_t) );
         int16_t be16;
         peek( (char*)&be16,sizeof(int16_t) );
         return ByteOrder::netToHost16(be16);
     }
 
-    bool peekInt8() const
+    bool peekInt8()
     {
-        tiny_assert( capacity() >= sizeof(int8_t) );
+        tiny_assert( capacity() >= (int)sizeof(int8_t) );
         int8_t be8;
         peek( (char*)&be8, sizeof(int8_t) );
         return be8;
@@ -173,28 +172,30 @@ public:
 
         char extrbuf[65535]={0};
 
-        srtuct iovec vec[2];
+        struct iovec vec[2];
 
         const size_t writable = freeSize();
+
         vec[0].iov_base = begin() + end_;
         vec[0].iov_len  = writable;
 
-        vec[0].iov_base = extrbuf;
-        vec[0].iov_len  = sizeof(extrbuf);
+        vec[1].iov_base = extrbuf;
+        vec[1].iov_len  = sizeof(extrbuf);
 
         const int iovcnt  =  writable < sizeof(extrbuf) ? 2 : 1;
-        int ret =  socketHelper_->readv( fd, vec, iovcnt );
 
-        if( ret < 0 ) {
+        int n =  socketHelper_->readv( fd, vec, iovcnt );
+
+        if( n < 0 ) {
             if(  errno != EWOULDBLOCK || errno != EAGAIN )  return -2;
         } else if( (size_t)n <= writable ) {
             end_ += n;
         }else{
-            end_ = buffer.size();
+            end_ = buffer_.size();
             append( extrbuf, n - writable );
         }
 
-        return ret;
+        return n;
     }
 
     int32_t flushFd( SocketHelper* socketHelper_, int fd )
@@ -209,18 +210,18 @@ public:
         return n;
     }
 private:
-    char* begin() { return &*buffer_.begin() };
+    char* begin()  { return &*buffer_.begin(); };
 
     void makeSpace( int len )
     {
-        if( freeSize() < len ) ){
+        if( freeSize() < len ) {
             buffer_.resize( end_ + len );
         } else {
             size_t readble = capacity();
             std::copy( begin()+begin_, begin()+end_, begin());
             begin_ =0;
             end_ = begin_ + readble;
-            tiny_assert( readble == capacity() );
+            tiny_assert( readble == (size_t)capacity() );
         }
     }
 private:

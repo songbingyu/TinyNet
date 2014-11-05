@@ -141,15 +141,15 @@ void Connection::onEvents( EventLoop* loop, IEvent* ev, int revents )
 {
     Connection* conn = (Connection*)ev->getUserData();
     if( NULL != conn ){
-        if( revents&EV_READ  ){
+        if( expect_true(revents&EV_READ)  ){
 
             conn->onRead();
 
-        }else if( revents&EV_WRITE ){
+        }else if( expect_false(revents&EV_WRITE) ){
 
             conn->onWrite();
 
-        }else if( revents&EV_ERROR ){
+        }else if( expect_false(revents&EV_ERROR) ){
 
             conn->onError();
         }else {

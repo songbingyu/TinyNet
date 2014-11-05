@@ -17,7 +17,7 @@
 
 #define  EV_EPERM   0x80
 
-EventEpoll::EventEpoll( EventLoop* loop ): IPoller( loop ), epollfd_( -1 ),epollEventMax_(64),events_( epollEventMax_ )
+EventEpoll::EventEpoll( EventLoop* loop ): IPoller( loop ), epollfd_( -1 ),epollEventMax_(128),events_( epollEventMax_ )
 {
     epollCreate() ;
 }

@@ -28,7 +28,7 @@ public:
     void addList( EventIo* ev );
     void delList( EventIo* ev );
     tiny_forceinline  void  tiny_cold  killFd( EventLoop* loop );
-    tiny_forceinline void fdEvent( EventLoop* loop, int revents  );
+    tiny_hot tiny_forceinline void fdEvent( EventLoop* loop, int revents  );
 public:
     EventIo*        head_;
     int             events_;

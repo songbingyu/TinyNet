@@ -83,7 +83,7 @@ public:
 
     bool hasWritten( size_t len )
     {
-        tiny_assert( len < (size_t)freeSize() );
+        tiny_assert( len <= (size_t)freeSize() );
         end_ += len;
         return true;
     }

@@ -20,9 +20,9 @@ public:
     static int     accept( int fd,struct  sockaddr_in* addr );
     static int     connect(int fd, const struct sockaddr_in* addr );
     int     read( int fd, char* buf, int len );
-    int     write( int fd, char* buf, int len );
+    tiny_hot int     write( int fd, char* buf, int len );
     //TODO  readv writev
-    int     readv(int fd, const struct iovec* iov, int iovcnt );
+    tiny_hot int     readv(int fd, const struct iovec* iov, int iovcnt );
 
     int     close( int fd );
     static int     shutdown( int fd );

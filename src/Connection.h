@@ -44,10 +44,11 @@ public:
     Connection( int fd,  EventLoop* loop, struct sockaddr_in& addr  );
     ~Connection();
 public:
-    int     onRead ();
-    int     onWrite();
-    int     onClose();
-    int     onError();
+    tiny_hot tiny_forceinline int     onRead ();
+    tiny_forceinline int     onWrite();
+    tiny_forceinline int     onClose();
+    tiny_forceinline  int     onError();
+
     int     onConnFinish();
     int     onConnDestory();
 public:
@@ -55,7 +56,7 @@ public:
     void    close();
     void    setTcpNoDelay() { socketHelper_->setTcpNoDelay( sockfd_,false ); }
 public:
-    static void onEvents( EventLoop* loop, IEvent* ev, int revents );
+    tiny_hot tiny_forceinline  static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 
 public:
 

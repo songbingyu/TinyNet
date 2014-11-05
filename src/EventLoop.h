@@ -37,7 +37,7 @@ public:
 public:
      int run( int flags );
 public:
-     void addPendingEvent( IEvent* ev, int evFlag );
+     tiny_hot tiny_forceinline void addPendingEvent( IEvent* ev, int evFlag );
      void delPendingEvent(IEvent* ev );
      void addActiveFdEvent ( EventIo* ev );
      void delActiveFdEvent ( EventIo* ev );
@@ -49,7 +49,7 @@ public:
      void onSignalEvent();
      void addFeedReverse( IEvent* ev );
      void feedReverseDone( int revents );
-     ActiveFdEvent*  getActiveFdEventByFd( int fd );
+     tiny_hot tiny_forceinline ActiveFdEvent*  getActiveFdEventByFd( int fd );
      tiny_forceinline void addActiveCnt() { ++activeCnt_; }
      tiny_forceinline void delActiveCnt() { --activeCnt_; }
      tiny_forceinline Timestamp   getNowTime() const  { return curTime_; }

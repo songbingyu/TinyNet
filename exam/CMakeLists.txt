@@ -6,5 +6,8 @@ INCLUDE_DIRECTORIES( ../src/  )
 
 LINK_DIRECTORIES(../lib )
 
+
 ADD_EXECUTABLE( server_test ${SRC_LIST})
 TARGET_LINK_LIBRARIES( server_test TinyNet )
+
+

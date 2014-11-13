@@ -37,7 +37,7 @@ public:
 public:
      int run( int flags );
 public:
-     tiny_hot tiny_forceinline void addPendingEvent( IEvent* ev, int evFlag );
+     tiny_hot void addPendingEvent( IEvent* ev, int evFlag );
      void delPendingEvent(IEvent* ev );
      void addActiveFdEvent ( EventIo* ev );
      void delActiveFdEvent ( EventIo* ev );

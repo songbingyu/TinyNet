@@ -54,7 +54,7 @@ public:
 public:
     void    send( char* data, int len );
     void    close();
-    void    setTcpNoDelay() { socketHelper_->setTcpNoDelay( sockfd_,false ); }
+    void    setTcpNoDelay( bool on ) { socketHelper_->setTcpNoDelay( sockfd_, on ); }
 public:
     tiny_hot tiny_forceinline  static void onEvents( EventLoop* loop, IEvent* ev, int revents );
 

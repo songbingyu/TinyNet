@@ -80,7 +80,7 @@ int TcpServer::init( )
 
 }
 
-void TcpServer::run( )
+void TcpServer::run( int flag  )
 {
      if( !acceptor_->isListen() )
      {
@@ -88,7 +88,7 @@ void TcpServer::run( )
        return;
      }
 
-    loop_-> run( EVRUN_ALWAYES );
+    loop_-> run( flag );
 
     return;
 

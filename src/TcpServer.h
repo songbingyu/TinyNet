@@ -20,7 +20,7 @@ public:
      ~TcpServer( );
 
 public:
-    void    run();
+    void    run( int flag );
 private:
     int     init();
 public:
@@ -30,7 +30,7 @@ public:
     void    setReadCallBack( const ReadCallBack& cb ) { readCallBack_ = cb; }
     void    setWriteCallBack( const WriteCallBack& cb ) { writeCallback_ = cb; }
     void    setCloseCallBack( const CloseCallBack& cb ) { closeCallBack_ = cb; }
-    void    setConnCallback( const ConnCallBack& cb ) { connCallBack_ = cb; }
+    void    setConnCallBack( const ConnCallBack& cb ) { connCallBack_ = cb; }
 private:
     int                     port_;
     TcpAcceptor*            acceptor_;

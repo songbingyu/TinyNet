@@ -168,7 +168,7 @@ public:
     int32_t readFd( SocketHelper* socketHelper_, int fd )
     {
         // should read 2 ?
-        tiny_assert( freeSize() > 0 );
+        //tiny_assert( freeSize() > 0 );
 
         char extrbuf[65535]={0};
 

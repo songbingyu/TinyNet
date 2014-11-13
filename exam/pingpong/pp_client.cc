@@ -144,7 +144,7 @@ private:
 
 void Session::onConnect( Connection* conn )
 {
-    conn->setTcpNoDelay();
+    conn->setTcpNoDelay( true );
     conn->send( const_cast<char*>(owner_->getMsg()->c_str()), owner_->getMsg()->size() );
     owner_->onConn( conn );
 }

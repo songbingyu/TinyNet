@@ -17,11 +17,11 @@ class ActiveFdEvent;
 class IPoller : nocopyable
 {
 public :
-    IPoller( EventLoop* loop );
+    IPoller(EventLoop* loop);
     virtual ~IPoller();
 public :
-    virtual void updateEvent( int fd,int oev, int nev ) = 0;
-    virtual void waitEvent( Timestamp ts ) = 0;
+    virtual void updateEvent(int fd,int oev, int nev) = 0;
+    virtual void waitEvent(Timestamp ts) = 0;
 public:
     tiny_forceinline Timestamp getMinWaitTime() const { return minWaitTime_; }
 protected:

@@ -14,8 +14,7 @@ class Singleton
 public:
      static     T*  GetInstance()
     {
-        if( NULL == instance_ )
-        {
+        if (NULL == instance_) {
              instance_ = new T();
         }
 

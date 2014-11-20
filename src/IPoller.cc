@@ -7,7 +7,7 @@
 #include "Event.h"
 #include "EventLoop.h"
 
-IPoller::IPoller( EventLoop* loop ): minWaitTime_(0), loop_(loop)
+IPoller::IPoller(EventLoop* loop): minWaitTime_(0), loop_(loop)
 {
 
 }

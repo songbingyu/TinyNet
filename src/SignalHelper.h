@@ -14,28 +14,27 @@ class IEvent;
 class EventIo;
 class EventSignal;
 
-namespace Tiny
-{
+namespace Tiny {
 
     typedef std::map<int,ActiveSignalEvent>  SigMap;
     extern  SigMap        sigMaps;
 
 
-    extern void addFeedSignal( int sigNum );
+    extern void addFeedSignal(int sigNum);
 
-    extern void sigHandle( int sigNum );
+    extern void sigHandle(int sigNum);
 
-    extern void pipeEventCb( EventLoop* loop, IEvent* ev, int revents );
+    extern void pipeEventCb(EventLoop* loop, IEvent* ev, int revents);
 
     class SignalHelper
     {
         public:
-            SignalHelper( EventLoop* loop );
+            SignalHelper(EventLoop* loop);
             ~SignalHelper();
         public:
             tiny_forceinline void init();
-            tiny_forceinline void addSignal( EventSignal* es );
-            tiny_forceinline void delSignal( EventSignal* es );
+            tiny_forceinline void addSignal(EventSignal* es);
+            tiny_forceinline void delSignal(EventSignal* es);
             tiny_forceinline void pipeWrite();
             tiny_forceinline void onSignalEvent();
         private:

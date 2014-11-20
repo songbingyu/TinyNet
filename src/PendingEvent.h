@@ -11,7 +11,7 @@
 class PendingEvent
 {
 public:
-    PendingEvent( IEvent* ev , int evFlag ): event_(ev),eventFlag_( evFlag )
+    PendingEvent(IEvent* ev , int evFlag): event_(ev), eventFlag_(evFlag)
     {
 
     }

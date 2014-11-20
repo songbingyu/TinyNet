@@ -17,7 +17,7 @@ class  SimpleBuffer
 public:
     static const int  kInitSize=1024*4;
 public:
-    SimpleBuffer(): buffer_(1024*4),begin_(0), end_( begin_ )
+    SimpleBuffer(): buffer_(1024*4),begin_(0), end_(begin_)
     {
 
     }
@@ -38,10 +38,10 @@ public:
         end_ = begin_ = 0;
     }
 
-    void retrieve( int len )
+    void retrieve(int len)
     {
         tiny_assert( len <= capacity() );
-        if( len < capacity() ){
+        if (len < capacity()) {
             begin_ += len;
         }else{
             retrieveAll();
@@ -68,72 +68,72 @@ public:
         retrieve(sizeof(int8_t));
     }
 
-    void append( char* data, int len )
+    void append( =char* data, int len =)
     {
-        tiny_assert( len !=0 && NULL != data );
-        if( freeSize() < len ){
-            makeSpace( len );
+        tiny_assert(len !=0 && NULL != data);
+        if (freeSize() < len) {
+            makeSpace(len);
         }
 
-        std::copy( data, data+len,begin() + end_ );
+        std::copy(data, data+len,begin() + end_);
 
         hasWritten(len);
 
     }
 
-    bool hasWritten( size_t len )
+    bool hasWritten(size_t len)
     {
-        tiny_assert( len <= (size_t)freeSize() );
+        tiny_assert(len <= (size_t)freeSize());
         end_ += len;
         return true;
     }
 
     char* peek() { return begin() + begin_; }
 
-    bool  peek( char* buf, int cnt )
+    bool  peek(char* buf, int cnt)
     {
 
-        tiny_assert( cnt <= capacity() );
-        memcpy( buf, begin() + begin_, cnt );
+        tiny_assert(cnt <= capacity());
+        memcpy(buf, begin() + begin_, cnt);
         return true;
     }
 
     bool peekInt64()
     {
-        tiny_assert( capacity() >= (int)sizeof(int64_t) );
+        tiny_assert(capacity() >= (int)sizeof(int64_t));
         int64_t be64 = 0;
-        peek( (char*)&be64, sizeof(int64_t) );
+        peek((char*)&be64, sizeof(int64_t));
         return ByteOrder::netToHost64(be64);
     }
 
     bool peekInt32()
     {
-        tiny_assert( capacity() >= (int)sizeof(int32_t) );
+        tiny_assert(capacity() >= (int)sizeof(int32_t));
         int32_t be32 = 0;
-        peek( (char*)&be32, sizeof(int32_t) );
+        peek((char*)&be32, sizeof(int32_t));
         return ByteOrder::netToHost32(be32);
     }
 
     bool peekInt16()
     {
-        tiny_assert( capacity() >= (int)sizeof(int16_t) );
+        tiny_assert(capacity() >= (int)sizeof(int16_t));
         int16_t be16;
-        peek( (char*)&be16,sizeof(int16_t) );
+        peek((char*)&be16,sizeof(int16_t));
         return ByteOrder::netToHost16(be16);
     }
 
     bool peekInt8()
     {
-        tiny_assert( capacity() >= (int)sizeof(int8_t) );
+        tiny_assert(capacity() >= (int)sizeof(int8_t));
         int8_t be8;
-        peek( (char*)&be8, sizeof(int8_t) );
+        peek((char*)&be8, sizeof(int8_t));
         return be8;
     }
 
-    void read( char* data, int len )
+    void read(char* data, int len)
     {
-        peek( data, len );
-        retrieve( len );
+        peek(data, len);
+        retrieve(len);
         return;
     }
 
@@ -184,26 +184,26 @@ public:
 
         const int iovcnt  =  writable < sizeof(extrbuf) ? 2 : 1;
 
-        int n =  socketHelper_->readv( fd, vec, iovcnt );
+        int n =  socketHelper_->readv(fd, vec, iovcnt);
 
-        if( n < 0 ) {
-            if(  errno != EWOULDBLOCK || errno != EAGAIN )  return -2;
-        } else if( (size_t)n <= writable ) {
+        if (n < 0) {
+            if (errno != EWOULDBLOCK || errno != EAGAIN)  return -2;
+        } else if ((size_t)n <= writable) {
             end_ += n;
-        }else{
+        } else {
             end_ = buffer_.size();
-            append( extrbuf, n - writable );
+            append(extrbuf, n - writable);
         }
 
         return n;
     }
 
-    int32_t flushFd( SocketHelper* socketHelper_, int fd )
+    int32_t flushFd(SocketHelper* socketHelper_, int fd)
     {
-        tiny_assert( capacity() > 0  );
-        int n = socketHelper_->write( fd, begin() + begin_, capacity() );
-        if( n > 0 ){
-            retrieve( n );
+        tiny_assert(capacity() > 0);
+        int n = socketHelper_->write(fd, begin() + begin_, capacity());
+        if (n > 0) {
+            retrieve(n);
         } else {
             //Fixme ? what should do ?
         }
@@ -214,14 +214,14 @@ private:
 
     void makeSpace( int len )
     {
-        if( freeSize() < len ) {
-            buffer_.resize( end_ + len );
+        if (freeSize() < len) {
+            buffer_.resize(end_ + len);
         } else {
             size_t readble = capacity();
-            std::copy( begin()+begin_, begin()+end_, begin());
+            std::copy(begin()+begin_, begin()+end_, begin());
             begin_ =0;
             end_ = begin_ + readble;
-            tiny_assert( readble == (size_t)capacity() );
+            tiny_assert(readble == (size_t)capacity());
         }
     }
 private:

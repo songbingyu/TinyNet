@@ -16,20 +16,20 @@ class Connection;
 class IEvent;
 class EvetnIo;
 
-typedef  CallBackDelegate<TcpServer, int, struct sockaddr_in >  NewConnectionCallBack;
+typedef  CallBackDelegate<TcpServer, int, struct sockaddr_in>  NewConnectionCallBack;
 
 class TcpAcceptor : public IConnection
 {
 public:
-    TcpAcceptor( int fd, EventLoop* loop, struct sockaddr_in&  addr  );
+    TcpAcceptor(int fd, EventLoop* loop, struct sockaddr_in&  addr);
     ~TcpAcceptor();
 public:
-    int     onRead( );
-    void    setNewConnectionCallBack( NewConnectionCallBack* cb ) { newConnCallBack_ = cb; }
-    int     bindAndListen( );
+    int     onRead();
+    void    setNewConnectionCallBack(NewConnectionCallBack* cb) { newConnCallBack_ = cb; }
+    int     bindAndListen();
     bool    isListen() const  {  return isListening_ == true;  }
 public:
-    static void onEvents( EventLoop* loop, IEvent* ev, int revents );
+    static void onEvents(EventLoop* loop, IEvent* ev, int revents);
 private:
 
     bool                          isListening_;

@@ -9,18 +9,16 @@
 
 #include "TinyDefine.h"
 
-namespace Tiny
-{
+namespace Tiny {
 
-    /*tiny_forceinline*/ void  upHeap( HeapVec& heap, int k )
+    /*tiny_forceinline*/ void  upHeap(HeapVec& heap, int k)
     {
         TimerHeap*  he  = heap[k];
 
-        for( ; ; )
-        {
+        for ( ; ; ) {
             int p = k >> 1;
-            if( !p || heap[p]->getAt() <= he->getAt() )
-            break;
+            if (!p || heap[p]->getAt() <= he->getAt())
+				break;
 
             heap[k] = heap[p];
             heap[k]->setActive(k);
@@ -32,44 +30,42 @@ namespace Tiny
         he->setActive(k);
     }
 
-    /*tiny_forceinline*/  void downHeap( HeapVec& heap, int N, int k )
+    /*tiny_forceinline*/  void downHeap(HeapVec& heap, int N, int k)
     {
         TimerHeap* he = heap[k];
-        for( ; ; )
-        {
+        for ( ; ; ) {
             int c = k << 1;
 
-            if( c >= N + 1 )
-            break;
-            c += c + 1 <  N + 1 && heap[c]->getAt()  >  heap[c+1]->getAt() ? 1 : 0;
+            if (c >= N + 1)
+				break;
+            c += c + 1 <  N + 1 && heap[c]->getAt() > heap[c+1]->getAt() ? 1 : 0;
 
-            if( he->getAt()  < heap[c]->getAt() )
-            break;
+            if (he->getAt() < heap[c]->getAt())
+				break;
 
             heap[k] = heap [c];
-            heap[k]->setActive( k );
+            heap[k]->setActive(k);
 
             k =  c;
         }
 
         heap[k] = he;
-        he->setActive( k );
+        he->setActive(k);
     }
 
-    tiny_forceinline void adjustHeap( HeapVec& heap, int N, int k )
+    tiny_forceinline void adjustHeap(HeapVec& heap, int N, int k)
     {
-        if( k > 1 && heap[k]->getActive() <= heap[ k >> 1 ]->getActive() ) {
-            upHeap( heap, k );
+        if (k > 1 && heap[k]->getActive() <= heap[k >> 1]->getActive()) {
+            upHeap(heap, k);
         } else {
-            downHeap( heap, N, k );
+            downHeap(heap, N, k);
         }
     }
 
-    tiny_forceinline void reHeap( HeapVec& heap, int N )
+    tiny_forceinline void reHeap(HeapVec& heap, int N)
     {
-        for( int i = 0; i < N; ++i )
-        {
-            upHeap( heap, i + 1 );
+        for (int i = 0; i < N; ++i) {
+            upHeap(heap, i + 1);
         }
 
     }

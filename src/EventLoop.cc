@@ -10,16 +10,16 @@
 #include "ActiveEvent.h"
 #include "PendingEvent.h"
 
-EventLoop::EventLoop(): isRuning_( true ), curPid_(0),
-                        activeCnt_(0),ioBlockTime_(0),signalHelper_(this)
+EventLoop::EventLoop(): isRuning_(true), curPid_(0),
+                        activeCnt_(0), ioBlockTime_(0), signalHelper_(this)
 {
     poller_ = getRecommendedPoller();
     curTime_ = tinyGetTime();
     //占位
-    timers_.push_back( NULL );
-    pendingEvents_.reserve( 1000 );
+    timers_.push_back(NULL);
+    pendingEvents_.reserve(1000);
     changeFds_.reserve(1000);
-    activeFdEvents_.reserve( 2000);
+    activeFdEvents_.reserve(2000);
 
 }
 
@@ -27,17 +27,17 @@ EventLoop::~EventLoop()
 {
     isRuning_ = false;
 
-    TINY_DELETE( poller_ );
+    TINY_DELETE(poller_);
 
     PendingArr::iterator it = pendingEvents_.begin();
-    for( ; it != pendingEvents_.end(); ++it ){
+    for ( ; it != pendingEvents_.end(); ++it) {
         delete *it;
     }
     pendingEvents_.clear();
 
     {
         ActiveFdArr::iterator it = activeFdEvents_.begin();
-        for( ; it!= activeFdEvents_.begin(); ++it ){
+        for ( ; it!= activeFdEvents_.begin(); ++it) {
             delete *it;
         }
         activeFdEvents_.clear();
@@ -47,7 +47,7 @@ EventLoop::~EventLoop()
 
     {
         HeapVec::iterator it = timers_.begin();
-        for( ; it != timers_.end(); ++it ){
+        for ( ; it != timers_.end(); ++it) {
             delete *it;
         }
         timers_.clear();
@@ -56,10 +56,10 @@ EventLoop::~EventLoop()
     rFeeds_.clear();
 }
 
-int  EventLoop::run( int flags )
+int  EventLoop::run(int flags)
 {
     do {
-        if( expect_false(curPid_) ) {
+        if (expect_false(curPid_)) {
             curPid_ = getpid();
         }
 
@@ -73,30 +73,29 @@ int  EventLoop::run( int flags )
             Timestamp   sleepTime=0.;
             updateTime( 1e100 );
 
-            if( expect_true( !( flags&EVRUN_NOWAIT  || !activeCnt_ ) ) ) {
+            if (expect_true(!( flags&EVRUN_NOWAIT || !activeCnt_))) {
                 waitTime = MAX_BLOCKTIME;
 
-                if( getTimerCount() > 0  )
-                {
+                if (getTimerCount() > 0) {
                     Timestamp to = timers_[kHeap0]->getAt() -  curTime_;
-                    if( waitTime > to )  waitTime = to;
+                    if (waitTime > to)  waitTime = to;
                 }
 
-                if( expect_false( waitTime < 0. ) ){
+                if (expect_false(waitTime < 0.)) {
                     waitTime = 0.;
                 }
 
-                if( expect_false( waitTime < poller_->getMinWaitTime() ) ){
+                if (expect_false(waitTime < poller_->getMinWaitTime())) {
                     waitTime = poller_->getMinWaitTime();
                 }
 
-                if( expect_false( ioBlockTime_ ) ) {
-                    sleepTime= ioBlockTime_ -( curTime_ - prevNowTime );
-                    if( sleepTime > waitTime - poller_->getMinWaitTime() ){
+                if (expect_false( ioBlockTime_)) {
+                    sleepTime= ioBlockTime_ -(curTime_ - prevNowTime);
+                    if (sleepTime > waitTime - poller_->getMinWaitTime()) {
                         sleepTime = waitTime = poller_->getMinWaitTime();
                     }
 
-                    if( expect_true( sleepTime > 0. ) ){
+                    if (expect_true(sleepTime > 0.)) {
                        tinySleep(sleepTime);
                        waitTime -= sleepTime;
                     }
@@ -104,9 +103,9 @@ int  EventLoop::run( int flags )
 
             }
 
-            poller_->waitEvent( waitTime );
+            poller_->waitEvent(waitTime);
 
-            updateTime( waitTime + sleepTime );
+            updateTime(waitTime + sleepTime);
 
             timersReify();
 
@@ -114,8 +113,8 @@ int  EventLoop::run( int flags )
 
 
         }
-    }while( expect_true( activeCnt_ &&
-                !( flags & ( EVRUN_ONCE )) ));
+    }while (expect_true(activeCnt_ &&
+                !( flags & ( EVRUN_ONCE ))));
 
    return  activeCnt_;
 
@@ -127,21 +126,21 @@ IPoller* EventLoop::getRecommendedPoller()
     return  new EventEpoll(this);
 }
 
-void EventLoop::addPendingEvent( IEvent* ev, int evFlag )
+void EventLoop::addPendingEvent(IEvent* ev, int evFlag)
 {
-    if( expect_false( ev->getPending()) ) {
-        pendingEvents_[ ev->getPending()-1 ]->eventFlag_ |= evFlag;
+    if (expect_false(ev->getPending())) {
+        pendingEvents_[ev->getPending()-1]->eventFlag_ |= evFlag;
     } else {
-        PendingEvent* pe  = new PendingEvent( ev, evFlag );
-        pendingEvents_.push_back( pe );
-        ev->setPending( (int)pendingEvents_.size() );
+        PendingEvent* pe  = new PendingEvent(ev, evFlag);
+        pendingEvents_.push_back(pe);
+        ev->setPending((int)pendingEvents_.size());
     }
 
 }
 
 void EventLoop::delPendingEvent( IEvent* ev )
 {
-    if( ev->getPending() ) {
+    if (ev->getPending()) {
         pendingEvents_[ev->getPending()-1]->clear();
         ev->setPending(0);
     }
@@ -150,59 +149,59 @@ void EventLoop::delPendingEvent( IEvent* ev )
 void EventLoop::addActiveFdEvent(EventIo* ev )
 {
     int  cnt = ev->getFd() + 1;
-    if( cnt > (int)activeFdEvents_.size() ) {
-        activeFdEvents_.resize( cnt, new ActiveFdEvent() );
+    if (cnt > (int)activeFdEvents_.size()) {
+        activeFdEvents_.resize(cnt, new ActiveFdEvent());
     }
 
-    ActiveFdEvent* activeEv = activeFdEvents_[ ev->getFd() ];
+    ActiveFdEvent* activeEv = activeFdEvents_[ev->getFd()];
 
-    activeEv->addList( ev );
+    activeEv->addList(ev);
 
-    addChangeFd( ev->getFd(), EV_IOFDSET );
+    addChangeFd(ev->getFd(), EV_IOFDSET);
 
 }
 
-void EventLoop::delActiveFdEvent( EventIo* ev )
+void EventLoop::delActiveFdEvent(EventIo* ev)
 {
-    ActiveFdEvent* activeEv = activeFdEvents_[ ev->getFd() ];
-    activeEv->delList( ev );
-    addChangeFd( ev->getFd(),EV_NO );
+    ActiveFdEvent* activeEv = activeFdEvents_[ev->getFd()];
+    activeEv->delList(ev);
+    addChangeFd(ev->getFd(),EV_NO);
 }
 
 void EventLoop::addTimer( EventTimer* ev )
 {
-    if( ev->getActive()+1 > getTimerCount() ){
-        timers_.resize( ev->getActive()+1 , NULL );
+    if (ev->getActive()+1 > getTimerCount()) {
+        timers_.resize(ev->getActive()+1 , NULL);
     }
-    timers_[ ev->getActive() ] = ( TimerEventList* )ev;
+    timers_[ev->getActive()] = (TimerEventList*)ev;
 
-    Tiny::upHeap( timers_, ev->getActive() );
+    Tiny::upHeap(timers_, ev->getActive());
 }
 
-void  EventLoop::delTimer( EventTimer* ev )
+void  EventLoop::delTimer(EventTimer* ev)
 {
-    if( expect_true( ev->getActive() < getTimerCount() + kHeap0 -1 ) ){
-        timers_[ ev->getActive() ] = timers_[ getTimerCount() + kHeap0 -1 ];
+    if (expect_true(ev->getActive() < getTimerCount() + kHeap0 -1 )) {
+        timers_[ev->getActive()] = timers_[getTimerCount() + kHeap0 -1];
         timers_.pop_back();
-        Tiny::adjustHeap( timers_, getTimerCount(), ev->getActive() );
+        Tiny::adjustHeap(timers_, getTimerCount(), ev->getActive());
     }else {
         timers_.pop_back();
     }
 }
 
-void EventLoop::addSignalEvent( EventSignal* es )
+void EventLoop::addSignalEvent(EventSignal* es)
 {
     signalHelper_.addSignal( es );
 }
 
-void EventLoop::delSignalEvent( EventSignal* es )
+void EventLoop::delSignalEvent(EventSignal* es)
 {
-    signalHelper_.delSignal( es );
+    signalHelper_.delSignal(es);
 }
 
-void EventLoop::addFeedSignal( int sigNum )
+void EventLoop::addFeedSignal(int sigNum)
 {
-   ActiveSignalEvent& es = Tiny::sigMaps[ sigNum ];
+   ActiveSignalEvent& es = Tiny::sigMaps[sigNum];
 
    es.pending_ = 1;
 
@@ -215,28 +214,28 @@ void EventLoop::onSignalEvent()
     signalHelper_.onSignalEvent();
 }
 
-void EventLoop::addFeedReverse( IEvent* ev )
+void EventLoop::addFeedReverse(IEvent* ev)
 {
-    rFeeds_.push_back( ev );
+    rFeeds_.push_back(ev);
 }
 
-void EventLoop::feedReverseDone( int revents )
+void EventLoop::feedReverseDone(int revents)
 {
     int  size = (int)rFeeds_.size();
-    for( int i=0; i < size; ++i ){
-        addPendingEvent( rFeeds_[i], revents );
+    for (int i=0; i < size; ++i) {
+        addPendingEvent(rFeeds_[i], revents);
     }
     rFeeds_.clear();
 }
 
-bool EventLoop::addChangeFd( int fd, int flags )
+bool EventLoop::addChangeFd(int fd, int flags)
 {
     int refiy = activeFdEvents_[fd]->refiy_;
 
     activeFdEvents_[fd]->refiy_ |= flags;
 
-    if( expect_true( !refiy ) ) {
-        changeFds_.push_back( fd );
+    if (expect_true(!refiy )) {
+        changeFds_.push_back(fd);
     }
 
     return true;
@@ -245,7 +244,7 @@ bool EventLoop::addChangeFd( int fd, int flags )
 void EventLoop::fdReify()
 {
     int size = changeFds_.size();
-    for( int i=0; i < size; ++i ) {
+    for (int i=0; i < size; ++i) {
         int fd = changeFds_[i];
         ActiveFdEvent *ev = activeFdEvents_[fd];
         int oEvents = ev->events_;
@@ -254,62 +253,62 @@ void EventLoop::fdReify()
         ev->events_ = 0;
         ev->refiy_  = 0;
 
-        for ( EventIo* e = ev->head_; e !=NULL; e = (EventIo*)*(e->getNext()) ){
+        for (EventIo* e = ev->head_; e !=NULL; e = (EventIo*)*(e->getNext())) {
             ev->events_ |= e->getEvents();
         }
 
-        if ( oEvents != ev->events_ ) {
+        if (oEvents != ev->events_) {
             oReify = EV_IOFDSET;
         }
 
-        if( oReify & EV_IOFDSET ) {
-            poller_->updateEvent( fd, oEvents, ev->events_ );
+        if (oReify & EV_IOFDSET) {
+            poller_->updateEvent(fd, oEvents, ev->events_);
         }
 
     }
     changeFds_.clear();
 }
 
-ActiveFdEvent* EventLoop::getActiveFdEventByFd( int fd ) {
+ActiveFdEvent* EventLoop::getActiveFdEventByFd(int fd) {
     return activeFdEvents_[fd];
 }
 
-void  EventLoop::updateTime( Timestamp maxBlockTime )
+void  EventLoop::updateTime(Timestamp maxBlockTime)
 {
     Timestamp nowTime = tinyGetTime();
-    if( expect_false( curTime_ > nowTime  || nowTime > curTime_ + maxBlockTime + MIN_TIMEJUMP ) ){
+    if (expect_false(curTime_ > nowTime  || nowTime > curTime_ + maxBlockTime + MIN_TIMEJUMP)) {
 
     }
     curTime_ = tinyGetTime();
 }
 
-void EventLoop::timerReSchedule( Timestamp adjust )
+void EventLoop::timerReSchedule(Timestamp adjust)
 {
     int timerCnt = getTimerCount();
-    for( int i=0; i < timerCnt; ++i ) {
-        TimerHeap* he = timers_[ i + kHeap0 ];
-        he->setAt( he->getAt() + adjust );
+    for (int i=0; i < timerCnt; ++i) {
+        TimerHeap* he = timers_[i + kHeap0];
+        he->setAt(he->getAt() + adjust);
     }
 }
 
 void EventLoop::timersReify()
 {
-    if( getTimerCount() && timers_[kHeap0]->getAt() < curTime_ ){
+    if (getTimerCount() && timers_[kHeap0]->getAt() < curTime_) {
         do
         {
             EventTimer* ev = ( EventTimer* )timers_[kHeap0];
 
-            if( ev->getRepeat() ){
-                ev->setAt( ev->getAt() + ev->getRepeat() );
-                if( ev->getAt() < curTime_ ){
-                    ev->setAt( curTime_ );
+            if (ev->getRepeat()) {
+                ev->setAt(ev->getAt() + ev->getRepeat());
+                if (ev->getAt() < curTime_) {
+                    ev->setAt(curTime_);
                 }
-                Tiny::downHeap( timers_, getTimerCount(), kHeap0 );
+                Tiny::downHeap(timers_, getTimerCount(), kHeap0);
             } else {
                 ev->stop();
             }
-            addFeedReverse( (IEvent*)ev );
-        }while( getTimerCount() && timers_[kHeap0]->getAt() < curTime_ );
+            addFeedReverse((IEvent*)ev);
+        }while (getTimerCount() && timers_[kHeap0]->getAt() < curTime_);
 
         feedReverseDone( EV_TIMER );
     }
@@ -318,10 +317,10 @@ void EventLoop::timersReify()
 void EventLoop::invokePending( )
 {
     int size = pendingEvents_.size();
-    for( int i=0; i < size; ++i ){
+    for (int i=0; i < size; ++i) {
         PendingEvent* pe = pendingEvents_[i];
         pe->event_->setPending( 0 );
-        pe->event_->onEvent( pe->eventFlag_ );
+        pe->event_->onEvent(pe->eventFlag_);
     }
 
     pendingEvents_.clear();

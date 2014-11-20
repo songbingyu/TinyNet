@@ -11,35 +11,34 @@
 #include "nocopyable.h"
 #include "IPoller.h"
 
-struct      epoll_event;
-//class       IConnection;
+struct epoll_event;
 
 
 // epoll wraper
-class  EventEpoll : public IPoller
+class EventEpoll : public IPoller
 {
 public :
-    EventEpoll( EventLoop* loop );
+    EventEpoll(EventLoop* loop);
     virtual ~EventEpoll();
 public:
     // see libevent ,find something is  trick stupid....
 
     // update?
 
-    virtual void  updateEvent( int fd, int oev, int nev  );
+    virtual void updateEvent(int fd, int oev, int nev);
 
     //int addEvent( IConnection* conn );
 
     //int delEvent( IConnection* conn );
 
-    virtual void waitEvent( Timestamp ts );
+    virtual void waitEvent(Timestamp ts);
 
 private:
     int  epollCreate();
 private:
     int epollfd_;
     int     epollEventMax_;
-    typedef  std::vector< struct epoll_event >  EventVec;
+    typedef  std::vector<struct epoll_event>  EventVec;
     EventVec            events_;
     typedef std::vector<int>            EpermsFdArr;
     EpermsFdArr         epermFds_;

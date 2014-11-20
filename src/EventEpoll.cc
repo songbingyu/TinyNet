@@ -17,33 +17,31 @@
 
 #define  EV_EPERM   0x80
 
-EventEpoll::EventEpoll( EventLoop* loop ): IPoller( loop ), epollfd_( -1 ),epollEventMax_(128),events_( epollEventMax_ )
+EventEpoll::EventEpoll(EventLoop* loop): IPoller(loop), epollfd_(-1), epollEventMax_(128), events_(epollEventMax_)
 {
     epollCreate() ;
 }
 
 EventEpoll::~EventEpoll()
 {
-    close( epollfd_ );
+    close(epollfd_);
 }
 
 int EventEpoll::epollCreate()
 {
 
-    epollfd_ = epoll_create1( EPOLL_CLOEXEC );
-    if( epollfd_ < 0 )
-    {
-        LOG_ERROR( " epoll create fail ... " );
+    epollfd_ = epoll_create1(EPOLL_CLOEXEC);
+    if (epollfd_ < 0) {
+        LOG_ERROR(" epoll create fail ... ");
         return -1;
     }
 
     return 0;
 }
 
-const char* eventStateToString( EventState  es )
+const char* eventStateToString(EventState  es)
 {
-    switch( es )
-    {
+    switch (es) {
         case ES_New:
             return "ES_New";
         case ES_Added:
@@ -57,55 +55,55 @@ const char* eventStateToString( EventState  es )
 }
 
 
-void  EventEpoll::updateEvent( int fd, int oev, int nev )
+void  EventEpoll::updateEvent(int fd, int oev, int nev)
 {
-    LOG_INFO(" updtate event to epoll fd :%d old event :%d new event: %d  ", fd, oev, nev );
+    LOG_INFO("updtate event to epoll fd :%d old event :%d new event: %d  ", fd, oev, nev);
 
     //libev
-    if( !nev )   return;
+    if(!nev)   return;
 
     struct epoll_event  ev;
-    memset( &ev, 0, sizeof(ev) );
+    memset(&ev, 0, sizeof(ev));
 
-    ActiveFdEvent*  activeEv  = loop_->getActiveFdEventByFd( fd );
+    ActiveFdEvent*  activeEv  = loop_->getActiveFdEventByFd(fd);
     int oldRevents = activeEv->revents_;
     activeEv->revents_ = nev;
 
     ev.data.u64  = (uint64_t)(uint32_t)fd |
                 (uint64_t)(uint32_t)++activeEv->egen_ << 32;
-    ev.events    = ( nev & EV_READ ? EPOLLIN : 0 )
-                | ( nev & EV_WRITE ? EPOLLOUT : 0 );
+    ev.events    = (nev & EV_READ ? EPOLLIN : 0)
+                | (nev & EV_WRITE ? EPOLLOUT : 0);
 
-    if( expect_true( !epoll_ctl( epollfd_, oev&&oldRevents != nev ? EPOLL_CTL_MOD: EPOLL_CTL_ADD, fd, &ev) ) ){
+    if (expect_true(!epoll_ctl(epollfd_, oev&&oldRevents != nev ? EPOLL_CTL_MOD: EPOLL_CTL_ADD, fd, &ev))) {
         return;
     }
 
-    if( expect_true( errno == ENOENT ) ) {
-        if( !nev ) {
+    if (expect_true( errno == ENOENT)) {
+        if (!nev) {
             goto  dec_egen;
-            if( !epoll_ctl( epollfd_, EPOLL_CTL_ADD, fd, &ev ) ) {
+            if (!epoll_ctl( epollfd_, EPOLL_CTL_ADD, fd, &ev)) {
                 return;
             }
         }
-    } else if( expect_true( errno == EEXIST ) ) {
-        if( oldRevents == nev ) {
+    } else if (expect_true(errno == EEXIST )) {
+        if (oldRevents == nev) {
             goto  dec_egen;
         }
 
-        if( !epoll_ctl( epollfd_, EPOLL_CTL_MOD, fd, &ev ) ) {
+        if (!epoll_ctl(epollfd_, EPOLL_CTL_MOD, fd, &ev)) {
             return;
         }
-    } else if( expect_true( errno == EPERM ) ) {
+    } else if (expect_true(errno == EPERM)) {
         activeEv->revents_ = EV_EPERM;
 
-        if( !( oldRevents & EV_EPERM ) ){
-            this->epermFds_.push_back( fd );
+        if (!(oldRevents & EV_EPERM)) {
+            this->epermFds_.push_back(fd);
         }
         return;
     }
 
     //This is a error
-    activeEv->killFd( loop_ );
+    activeEv->killFd(loop_);
 
 dec_egen:
 
@@ -115,68 +113,68 @@ dec_egen:
     return ;
 }
 
-void  EventEpoll::waitEvent( Timestamp ts )
+void  EventEpoll::waitEvent(Timestamp ts)
 {
 #ifdef _DEBUG_
    // assert( epollfd_ != NULL );
 #endif
 
-    if( expect_false( epermFds_.size() ) ) {
+    if (expect_false(epermFds_.size())) {
         ts = 0;
     }
 
-    int numEvents =  epoll_wait( epollfd_, &*events_.begin(), (int)events_.size(), ts*1e3 );
+    int numEvents =  epoll_wait(epollfd_, &*events_.begin(), (int)events_.size(), ts*1e3);
 
-    if( expect_false( numEvents < 0 ) ) {
-        if( errno != EINTR ){
+    if ( expect_false(numEvents < 0)) {
+        if (errno != EINTR) {
             LOG_ERROR(" epoll_wait error");
         }
     }
 
-    for ( int i=0; i < numEvents;  ++i ) {
+    for (int i=0; i < numEvents;  ++i) {
 
         struct  epoll_event*  ev = &events_[i];
         int     fd      = (uint32_t)ev->data.u64;
-        ActiveFdEvent*  activeEv =  loop_->getActiveFdEventByFd( fd );
+        ActiveFdEvent*  activeEv =  loop_->getActiveFdEventByFd(fd);
 
         int     want    =  activeEv->events_;
 
-        int     got     =  ( ev->events &( EPOLLOUT|EPOLLERR|EPOLLHUP)? EV_WRITE : 0 )
-                        |  ( ev->events &(EPOLLIN|EPOLLERR|EPOLLHUP)? EV_READ : 0 );
+        int     got     =  (ev->events &( EPOLLOUT|EPOLLERR|EPOLLHUP)? EV_WRITE : 0)
+							|(ev->events &(EPOLLIN|EPOLLERR|EPOLLHUP)? EV_READ : 0);
 
-        if( expect_false((uint32_t)activeEv->egen_ != (uint32_t)( ev->data.u64>>32 ))){
+        if (expect_false((uint32_t)activeEv->egen_ != (uint32_t)( ev->data.u64>>32))) {
             continue;
         }
 
-        if( expect_false( got & ~want )) {
+        if (expect_false(got & ~want)) {
 
             activeEv->revents_ = want;
 
-            ev->events = ( want & EV_READ ? EPOLLIN  : 0 )
-                        |( want & EV_WRITE? EPOLLOUT : 0 );
-            if( epoll_ctl( epollfd_, want? EPOLL_CTL_MOD:EPOLL_CTL_DEL, fd, ev )){
+            ev->events = (want & EV_READ ? EPOLLIN  : 0)
+                        |(want & EV_WRITE? EPOLLOUT : 0);
+            if (epoll_ctl(epollfd_, want? EPOLL_CTL_MOD:EPOLL_CTL_DEL, fd, ev)) {
                 continue;
             }
         }
-        activeEv->fdEvent( loop_, got );
+        activeEv->fdEvent(loop_, got);
     }
 
-    if( expect_false( numEvents == epollEventMax_ )) {
+    if (expect_false(numEvents == epollEventMax_)) {
         //TODO: find a suitable size ?
         epollEventMax_ *= 2;
-        events_.resize( epollEventMax_ );
+        events_.resize(epollEventMax_);
     }
 
     int epermCnt = epermFds_.size();
 
-    for( int i= epermCnt-1; i>=0;  --i ){
+    for (int i= epermCnt-1; i>=0;  --i) {
         int fd = epermFds_[i];
-        ActiveFdEvent*  activeEv =  loop_->getActiveFdEventByFd( fd );
-        int events  =   activeEv->events_&( EV_READ | EV_WRITE );
-        if( activeEv->revents_ & EV_EPERM && events ){
-            activeEv->fdEvent( loop_, events );
+        ActiveFdEvent*  activeEv =  loop_->getActiveFdEventByFd(fd);
+        int events  =   activeEv->events_&(EV_READ | EV_WRITE);
+        if (activeEv->revents_ & EV_EPERM && events) {
+            activeEv->fdEvent(loop_, events);
         } else {
-            epermFds_[i]= epermFds_[ epermFds_.size()-1];
+            epermFds_[i]= epermFds_[epermFds_.size()-1];
             epermFds_.pop_back();
         }
     }

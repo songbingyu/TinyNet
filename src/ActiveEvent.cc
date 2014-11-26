@@ -6,18 +6,18 @@
 #include "Event.h"
 #include "EventLoop.h"
 
-void ActiveFdEvent::addList( EventIo* ev )
+void ActiveFdEvent::addList(EventIo* ev)
 {
     *ev->getNext() = head_;
     head_ = ev;
 }
 
-void ActiveFdEvent::delList( EventIo* ev )
+void ActiveFdEvent::delList(EventIo* ev)
 {
-    EventList** head = ( EventList**)&head_;
-    while( *head ) {
+    EventList** head = (EventList**)&head_;
+    while (*head) {
 
-        if( expect_true( *head == ev ) ){
+        if (expect_true(*head == ev)) {
             *head = *ev->getNext();
             break;
         }
@@ -26,36 +26,36 @@ void ActiveFdEvent::delList( EventIo* ev )
     }
 }
 
-void ActiveFdEvent::killFd( EventLoop* loop )
+void ActiveFdEvent::killFd(EventLoop* loop)
 {
     EventIo* ev = NULL;
-    while( (ev = head_ ) ){
+    while ((ev = head_)) {
         ev->stop();
-        loop->addPendingEvent( (IEvent*)ev, EV_ERROR | EV_WRITE | EV_READ );
+        loop->addPendingEvent((IEvent*)ev, EV_ERROR | EV_WRITE | EV_READ);
     }
 
 }
 
-void ActiveFdEvent::fdEvent( EventLoop* loop, int revents  )
+void ActiveFdEvent::fdEvent(EventLoop* loop, int revents)
 {
     EventList* head = head_;
-    for( ; head != NULL; head = *head->getNext() ){
-        loop->addPendingEvent( (IEvent*)head , revents );
+    for ( ; head != NULL; head = *head->getNext()) {
+        loop->addPendingEvent((IEvent*)head , revents);
     }
 
 }
 
-void ActiveSignalEvent::addList( EventList* el )
+void ActiveSignalEvent::addList(EventList* el)
 {
     *el->getNext() = head_;
     head_ = el;
 }
 
-void ActiveSignalEvent::delList( EventList* el )
+void ActiveSignalEvent::delList(EventList* el)
 {
-    EventList** head = ( EventList**)&head_;
-    while( *head ) {
-        if( expect_true( *head == el )){
+    EventList** head = (EventList**)&head_;
+    while (*head) {
+        if (expect_true(*head == el)) {
             *head = *el->getNext();
             break;
         }
@@ -67,8 +67,8 @@ void ActiveSignalEvent::delList( EventList* el )
 void ActiveSignalEvent::addFeedEvent()
 {
     EventList* head = head_;
-    for( ; head != NULL; head = *head->getNext() ){
-        loop_->addPendingEvent( (IEvent*)head , EV_SIGNAL );
+    for ( ; head != NULL; head = *head->getNext()) {
+        loop_->addPendingEvent((IEvent*)head , EV_SIGNAL);
     }
 }
 

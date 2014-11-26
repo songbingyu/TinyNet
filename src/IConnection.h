@@ -12,20 +12,20 @@
 #include "SocketHelper.h"
 
 // you know Connection must be  not copy
-class IConnection: public nocopyable
+class IConnection : public nocopyable
 {
 
 public:
-    IConnection( int fd, EventLoop* loop ): sockfd_( fd ),loop_( loop )
+    IConnection(int fd, EventLoop* loop): sockfd_(fd), loop_(loop)
     {
         socketHelper_ = new SocketHelper();
 
     }
 
-    ~IConnection( )
+    ~IConnection()
     {
         //Fixme: should close socket ?
-        socketHelper_->close( sockfd_ );
+        socketHelper_->close(sockfd_);
         sockfd_ = -1;
         loop_   = NULL;
 
@@ -34,7 +34,7 @@ public:
     }
 
 public:
-    int     getSockFd( ) const      { return sockfd_ ;    }
+    int     getSockFd() const      {	return sockfd_ ;    }
 protected:
     int                 sockfd_;
     EventLoop*          loop_;

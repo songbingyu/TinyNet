@@ -19,20 +19,20 @@ class EventLoop;
 
 
 //typedef  CallBackDelegate<TcpClient, int , struct sockaddr_in  >     NewConnCallBack;
-typedef std::function< void ( int, struct sockaddr_in& addr ) > NewConnCallBack;
+typedef std::function<void (int, struct sockaddr_in& addr)> NewConnCallBack;
 
 class Connector
 {
 public:
-    Connector( EventLoop* loop, struct sockaddr_in& addr  );
+    Connector(EventLoop* loop, struct sockaddr_in& addr);
     ~Connector();
 public:
     void start();
     void restart();
     void stop();
-    void setNewConnCb( const  NewConnCallBack& cb ) { newConnCb_ = cb; }
+    void setNewConnCb(const NewConnCallBack& cb) { newConnCb_ = cb; }
 public:
-    static void onEvents( EventLoop* loop, IEvent* ev, int revents );
+    static void onEvents(EventLoop* loop, IEvent* ev, int revents);
 private:
     enum States
     {
@@ -45,11 +45,11 @@ private:
         kMaxReTryCnt = 3,
     };
 
-    tiny_forceinline  void setState( States s) { state_ = s; }
+    tiny_forceinline  void setState(States s) { state_ = s; }
     void connect();
-    void retry( int fd );
+    void retry(int fd);
     void delEvent();
-    void onWaitConnectFinish( int fd );
+    void onWaitConnectFinish(int fd);
     void onWrite();
     void onError();
 private:

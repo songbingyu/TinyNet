@@ -14,8 +14,8 @@ protected:
     nocopyable()  { }
     ~nocopyable() { }
 private:
-    nocopyable( nocopyable& );
-    nocopyable& operator=( nocopyable& );
+    nocopyable(nocopyable&);
+    nocopyable& operator=(nocopyable&);
 };
 
 

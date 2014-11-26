@@ -71,8 +71,8 @@ enum
 
 
 
-#define  tiny_assert( expr )     assert( expr )
-#define  TINY_DELETE( v )  { delete v; v = NULL; }
+#define  tiny_assert(expr)     assert(expr)
+#define  TINY_DELETE(v)  { delete v; v = NULL; }
 
 #define MIN_TIMEJUMP    1.
 #define MAX_BLOCKTIME  59.743
@@ -96,8 +96,8 @@ enum EventRunFlag
 const static int kHeap0 = 1;
 
 extern Timestamp  tinyGetTime();
-extern void tinySleep( Timestamp t );
-extern void fdInteral( int fd );
+extern void tinySleep(Timestamp t);
+extern void fdInteral(int fd);
 
 
 #endif

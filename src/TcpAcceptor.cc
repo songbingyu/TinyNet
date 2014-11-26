@@ -17,9 +17,9 @@
 
 
 
-TcpAcceptor::TcpAcceptor( int fd, EventLoop* loop, struct sockaddr_in&  addr ): IConnection( fd, loop ),
+TcpAcceptor::TcpAcceptor(int fd, EventLoop* loop, struct sockaddr_in&  addr): IConnection(fd, loop),
                                                                                 localAddr_(addr),
-                                                                                ev_(loop,TcpAcceptor::onEvents, fd, EV_READ )
+                                                                                ev_(loop,TcpAcceptor::onEvents, fd, EV_READ)
 {
 
     bindAndListen();
@@ -35,21 +35,19 @@ TcpAcceptor::~TcpAcceptor()
 }
 
 
-int TcpAcceptor::bindAndListen( )
+int TcpAcceptor::bindAndListen()
 {
 
     //Fixme: add  socket option
 
-    if ( socketHelper_->bind( sockfd_,  &localAddr_ )  < 0 )
-    {
+    if ( socketHelper_->bind(sockfd_,  &localAddr_ ) < 0 ) {
         exit(1);
     }
 
     LOG_INFO(" bind socket success ");
 
 
-    if( socketHelper_->listen( sockfd_ ) < 0 )
-    {
+    if (socketHelper_->listen(sockfd_) < 0) {
         exit(1);
     }
 
@@ -57,7 +55,7 @@ int TcpAcceptor::bindAndListen( )
 
     isListening_ = true;
 
-    ev_.setUserData( (void*)this);
+    ev_.setUserData((void*)this);
     ev_.start();
 
     return  1;
@@ -67,30 +65,26 @@ int TcpAcceptor::bindAndListen( )
 
 int  TcpAcceptor::onRead( )
 {
-     assert( socketHelper_ != NULL  );
+     assert(socketHelper_ != NULL );
      struct sockaddr_in addr ;
-     int newfd = socketHelper_->accept( sockfd_, &addr );
-     if( newfd  >= 0 )
-     {
-         if( NULL != newConnCallBack_ )
-         {
-             newConnCallBack_->callback( &newfd, &addr  );
+     int newfd = socketHelper_->accept(sockfd_, &addr);
+     if (newfd >= 0) {
+         if (NULL != newConnCallBack_) {
+             newConnCallBack_->callback(&newfd, &addr);
          }
-     }
-     else
-     {
-         LOG_ERROR("Acceptor accpet new conn fail:%d ", errno  );
+     } else {
+         LOG_ERROR("Acceptor accpet new conn fail:%d ", errno);
      }
 
      return 1;
 }
 
-void TcpAcceptor::onEvents( EventLoop* loop, IEvent* ev, int revents_ )
+void TcpAcceptor::onEvents(EventLoop* loop, IEvent* ev, int revents_)
 {
     TcpAcceptor* acceptor = (TcpAcceptor*)ev->getUserData();
-    if( revents_&EV_READ ){
+    if (revents_&EV_READ) {
         acceptor->onRead();
-    }else {
+    } else {
         LOG_ERROR("EventIo receieve event:%d not EV_READ ");
     }
 }

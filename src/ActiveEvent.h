@@ -25,10 +25,10 @@ public:
 
     }
 public:
-    void addList( EventIo* ev );
-    void delList( EventIo* ev );
-    tiny_forceinline  void  tiny_cold  killFd( EventLoop* loop );
-    tiny_hot tiny_forceinline void fdEvent( EventLoop* loop, int revents  );
+    void addList(EventIo* ev);
+    void delList(EventIo* evs);
+    tiny_forceinline  void  tiny_cold  killFd(EventLoop* loop);
+    tiny_hot tiny_forceinline void fdEvent(EventLoop* loop, int reventss);
 public:
     EventIo*        head_;
     int             events_;
@@ -49,8 +49,8 @@ public:
 
     }
 public:
-    void addList( EventList* el );
-    void delList( EventList* el );
+    void addList(EventList* el);
+    void delList(EventList* el);
     void addFeedEvent();
 public:
     EventList*  head_;

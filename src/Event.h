@@ -11,17 +11,17 @@
 
 
 // all event base
-class       IEvent;
-class       EventLoop;
-class       TimerEventList;
-typedef     TimerEventList  TimerHeap;
-typedef     std::vector< TimerHeap* >  HeapVec;
-typedef     void (*EVENT_CB)(EventLoop* loop, IEvent* ev,  int revents_);
+class IEvent;
+class EventLoop;
+class TimerEventList;
+typedef TimerEventList TimerHeap;
+typedef std::vector<TimerHeap > HeapVec;
+typedef void (*EVENT_CB)(EventLoop* loop, IEvent* ev,  int revents_);
 
 class IEvent
 {
 public:
-    IEvent( EventLoop* loop, EVENT_CB cb ):active_(0),pending_(0),data_(NULL),cb_(cb), loop_(loop){ }
+    IEvent(EventLoop* loop, EVENT_CB cb): active_(0), pending_(0), data_(NULL),cb_(cb), loop_(loop){ }
     ~IEvent() { }
 protected:
     void  init()
@@ -31,16 +31,16 @@ protected:
         data_       = NULL;
     }
 public:
-    tiny_hot void   onEvent(int revents );
-    tiny_forceinline void   ev_start( int active );
+    tiny_hot void   onEvent(int revents);
+    tiny_forceinline void   ev_start(int active);
     tiny_forceinline void   ev_stop();
     tiny_forceinline bool   isActive() const { return active_ > 0 ; }
     tiny_forceinline int    getActive() const { return active_; }
-    tiny_forceinline void   setActive( int active ) { active_ =  active; }
-    tiny_forceinline void   setPending( int pending )  { pending_ = pending; }
+    tiny_forceinline void   setActive(int active) { active_ =  active; }
+    tiny_forceinline void   setPending(int pending)  { pending_ = pending; }
     tiny_forceinline int    getPending() const { return pending_; }
     tiny_forceinline void*  getUserData() const { return data_; }
-    tiny_forceinline void   setUserData( void* data ){ data_ = data; }
+    tiny_forceinline void   setUserData(void* data){ data_ = data; }
 protected:
     int         active_;
     int         pending_;
@@ -50,10 +50,10 @@ protected:
 
 };
 
-class  EventList  : public IEvent
+class EventList: public IEvent
 {
 public:
-    EventList( EventLoop* loop, EVENT_CB cb ) :IEvent( loop, cb ),next_(NULL)
+    EventList(EventLoop* loop, EVENT_CB cb): IEvent(loop, cb), next_(NULL)
     {
 
     }
@@ -61,7 +61,7 @@ public:
     {
 
     }
-    tiny_forceinline    EventList**  getNext()   { return &this->next_;  }
+    tiny_forceinline EventList** getNext()   {  return &this->next_;  }
 protected:
     EventList*  next_;
 };
@@ -69,8 +69,8 @@ protected:
 class TimerEventList : public IEvent
 {
 public:
-    TimerEventList( EventLoop* loop, EVENT_CB cb, Timestamp after ) : IEvent( loop, cb ), at_(after),
-                                                                    next_(NULL)
+    TimerEventList(EventLoop* loop, EVENT_CB cb, Timestamp after): IEvent(loop, cb), at_(after),
+                                                                   next_(NULL)
     {
 
     }
@@ -81,17 +81,17 @@ public:
 public:
     Timestamp   getAt() const  { return at_; }
     TimerEventList** getNext() { return &next_; }
-    tiny_forceinline void setAt( Timestamp at ) { at_ = at; }
+    tiny_forceinline void setAt(Timestamp at) { at_ = at; }
 protected:
     Timestamp   at_;
     TimerEventList*  next_;
 };
 
-class EventIo : public EventList
+class EventIo: public EventList
 {
 
 public:
-    EventIo( EventLoop* loop, EVENT_CB cb, int fd , int events ):EventList( loop, cb ), fd_(fd),events_( events )
+    EventIo(EventLoop* loop, EVENT_CB cb, int fd , int events): EventList(loop, cb), fd_(fd), events_(events)
     {
 
     }
@@ -106,7 +106,7 @@ public:
     tiny_forceinline    bool isReading() const { return events_&EV_READ;   }
     tiny_forceinline    bool isWriteing() const { return events_&EV_WRITE; }
 
-    bool changeEvents( int events );
+    bool changeEvents(int events);
 
 
 public:
@@ -118,10 +118,10 @@ private:
 
 };
 
-class EventTimer : public   TimerEventList
+class EventTimer: public TimerEventList
 {
 public:
-    EventTimer( EventLoop* loop, EVENT_CB cb, Timestamp after, int repeat ):TimerEventList( loop, cb, after ),repeat_( repeat )
+    EventTimer(EventLoop* loop, EVENT_CB cb, Timestamp after, int repeat):TimerEventList(loop, cb, after),repeat_(repeat)
     {
 
     }
@@ -145,7 +145,7 @@ public:
 class EventSignal : public EventList
 {
 public:
-    EventSignal( EventLoop* loop, EVENT_CB cb, int sigNum ):EventList( loop, cb ),sigNum_(sigNum)
+    EventSignal(EventLoop* loop, EVENT_CB cb, int sigNum ): EventList(loop, cb), sigNum_(sigNum)
     {
 
     }
@@ -154,8 +154,8 @@ public:
 
     }
 public:
-    tiny_forceinline    void setSigNum( int sigNum ) { sigNum_ = sigNum; }
-    tiny_forceinline    int  getSigNum() const       { return sigNum_;   }
+    tiny_forceinline    void setSigNum(int sigNum) { sigNum_ = sigNum; }
+    tiny_forceinline    int  getSigNum() const     { return sigNum_;   }
     void start();
     void stop ();
 

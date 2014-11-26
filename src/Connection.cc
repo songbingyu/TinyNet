@@ -10,9 +10,9 @@
 #include "Connection.h"
 
 
-Connection::Connection( int fd, EventLoop* loop, struct sockaddr_in& addr  ): IConnection( fd, loop ),
-                                                                            state_(CS_DisConnected),
-                                                                            ev_(loop,Connection::onEvents, fd, EV_READ )
+Connection::Connection(int fd, EventLoop* loop, struct sockaddr_in& addr): IConnection(fd, loop),
+                                                                           state_(CS_DisConnected),
+                                                                           ev_(loop,Connection::onEvents, fd, EV_READ)
 {
 
 }
@@ -22,42 +22,42 @@ Connection::~Connection()
     close();
 }
 
-void Connection::send( char* data, int len )
+void Connection::send(char* data, int len)
 {
-    if( state_ != CS_Connected ) return;
+    if (state_ != CS_Connected) return;
     int nwrite = 0;
     int remaining = len;
     int writeError = false;
 
 
-    if(  !ev_.isWriteing() && writeBuf_.capacity() ==0 ){
-        nwrite = socketHelper_->write( sockfd_, data, len );
-        if( nwrite >= 0  ){
+    if (!ev_.isWriteing() && writeBuf_.capacity() ==0) {
+        nwrite = socketHelper_->write(sockfd_, data, len);
+        if (nwrite >= 0){
             remaining = remaining - nwrite;
-            if( remaining == 0 ){
+            if (remaining == 0) {
                 //Fixme: should callback?
             }
-        }else {
+        } else {
             nwrite = 0;
-            if( errno != EWOULDBLOCK ){
-                if( errno == EPIPE || errno == ECONNRESET ){
+            if (errno != EWOULDBLOCK) {
+                if (errno == EPIPE || errno == ECONNRESET) {
                     writeError = true;
                 }
             }
         }
     }
 
-    if( remaining > 0 && !writeError ){
+    if (remaining > 0 && !writeError) {
         int oldLen = writeBuf_.capacity();
-        if( oldLen + remaining > writeBuf_.size() ){
+        if (oldLen + remaining > writeBuf_.size()) {
             //Fixme : over
             LOG_ERROR("connection socket buff over, fd:%d ,events:%d", sockfd_, ev_.getEvents() );
         }
 
-        writeBuf_.append( data+nwrite, remaining );
+        writeBuf_.append(data+nwrite, remaining);
 
-        if( !ev_.isWriteing() ){
-            ev_.changeEvents( ev_.getEvents()&EV_WRITE );
+        if (!ev_.isWriteing()) {
+            ev_.changeEvents(ev_.getEvents()&EV_WRITE);
         }
     }
 
@@ -65,32 +65,31 @@ void Connection::send( char* data, int len )
 
 void Connection::close()
 {
-    if( state_ == CS_Connecing || state_ == CS_Connected ){
+    if(state_ == CS_Connecing || state_ == CS_Connected){
         state_ = CS_DisConnecting;
         onClose();
     }
 }
 
-int  Connection::onRead( )
+int  Connection::onRead()
 {
 
     //read shoule do what?
-    int ret = readBuf_.readFd(socketHelper_, sockfd_ );
-    if( ret < 0  )
-    {
+    int ret = readBuf_.readFd(socketHelper_, sockfd_);
+    if (ret < 0) {
         onClose();
         return 0;
     }
 
-    readCallback_( this );
+    readCallback_(this);
     return 1;
 }
 
-int  Connection::onWrite( )
+int  Connection::onWrite()
 {
-    if( ev_.isWriteing() && writeBuf_.capacity() ){
-        int n = writeBuf_.flushFd( socketHelper_, sockfd_ );
-        if( n <=0 ){
+    if (ev_.isWriteing() && writeBuf_.capacity()) {
+        int n = writeBuf_.flushFd(socketHelper_, sockfd_);
+        if(n <=0){
 
         }
     }
@@ -99,20 +98,20 @@ int  Connection::onWrite( )
 }
 
 
-int  Connection::onClose( )
+int  Connection::onClose()
 {
     state_ = CS_DisConnected;
     ev_.stop();
 
 #ifdef _DEBUG_
-    assert( NULL != closeCallBack_ );
+    assert(NULL != closeCallBack_);
 #endif
 
-    closeCallBack_( this );
+    closeCallBack_(this);
     return 1;
 }
 
-int   Connection::onError( )
+int   Connection::onError()
 {
     //TODO: see nginx what ?
     return 1;
@@ -121,15 +120,15 @@ int   Connection::onError( )
 int  Connection::onConnFinish()
 {
     state_ = CS_Connected;
-    ev_.setUserData( (void*)this );
+    ev_.setUserData((void*)this);
     ev_.start();
-    connCallBack_( this );
+    connCallBack_(this);
     return 1;
 }
 
 int Connection::onConnDestory()
 {
-    if( state_ == CS_Connected ){
+    if (state_ == CS_Connected) {
 
         state_ = CS_DisConnected;
         ev_.stop();
@@ -140,19 +139,19 @@ int Connection::onConnDestory()
 void Connection::onEvents( EventLoop* loop, IEvent* ev, int revents )
 {
     Connection* conn = (Connection*)ev->getUserData();
-    if( NULL != conn ){
-        if( expect_true(revents&EV_READ)  ){
+	if (expect_true(NULL != conn)){
+        if (expect_true(revents&EV_READ)) {
 
             conn->onRead();
 
-        }else if( expect_false(revents&EV_WRITE) ){
+        } else if (expect_false(revents&EV_WRITE)){
 
             conn->onWrite();
 
-        }else if( expect_false(revents&EV_ERROR) ){
+        } else if (expect_false(revents&EV_ERROR)){
 
             conn->onError();
-        }else {
+        } else {
 
             LOG_ERROR("conn :%d unknow event:%d ", conn->getSockFd(),revents );
         }

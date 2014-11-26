@@ -9,14 +9,14 @@
 #include "EventLoop.h"
 #include "Log.h"
 
-void IEvent:: onEvent( int revents )
+void IEvent:: onEvent(int revents)
 {
-    if( expect_true( cb_ != NULL ) ) {
-        (*cb_)( loop_, this,  revents);
+    if (expect_true(cb_ != NULL)) {
+        (*cb_)(loop_, this,  revents);
     }
 }
 
-void IEvent::ev_start( int active )
+void IEvent::ev_start(int active)
 {
     active_ = active;
     loop_->addActiveCnt();
@@ -29,41 +29,41 @@ void IEvent::ev_stop()
     loop_->delActiveCnt();
 }
 
-bool EventIo::changeEvents( int events )
+bool EventIo::changeEvents(int events)
 {
-    tiny_assert( events != EV_NO );
-    if( expect_false( !isActive()|| events_ == events  )){
+    tiny_assert(events != EV_NO);
+    if (expect_false(!isActive()|| events_ == events)) {
         LOG_SYS(" change events eventio not active ");
         return false;
     }
-    loop_->addChangeFd( fd_, EV_IOFDSET );
+    loop_->addChangeFd(fd_, EV_IOFDSET);
     return true;
 }
 
 void EventIo::start()
 {
-    if (expect_false( isActive() ) ){
+    if (expect_false(isActive())) {
         return;
     }
 
-    tiny_assert( fd_ > 0 );
-    tiny_assert( !(events_&~(EV_IOFDSET | EV_READ | EV_WRITE )));
+    tiny_assert(fd_ > 0);
+    tiny_assert(!(events_&~(EV_IOFDSET | EV_READ | EV_WRITE )));
 
     ev_start(1);
-    loop_->addActiveFdEvent( this );
+    loop_->addActiveFdEvent(this);
 }
 
 void EventIo::stop()
 {
-    loop_->delPendingEvent( this );
+    loop_->delPendingEvent(this);
 
-    if ( expect_false( !isActive() ) ) {
+    if (expect_false(!isActive())) {
         return ;
     }
 
-    tiny_assert( fd_ > 0 );
+    tiny_assert(fd_ > 0);
 
-    loop_->delActiveFdEvent( this );
+    loop_->delActiveFdEvent(this);
 
     ev_stop();
 }
@@ -71,64 +71,64 @@ void EventIo::stop()
 
 void EventTimer::start()
 {
-    if( isActive() ) {
+    if (isActive()) {
         return;
     }
 
     at_ += loop_->getNowTime();
 
-    tiny_assert( repeat_ >= 0 );
+    tiny_assert(repeat_ >= 0);
 
-    ev_start( loop_->getTimerCount() + 1 );
+    ev_start(loop_->getTimerCount() + 1);
 
-    loop_->addTimer( this );
+    loop_->addTimer(this);
 
 }
 
 void EventTimer::stop()
 {
-    loop_->delPendingEvent( this );
-    if( expect_false( !isActive() )){
+    loop_->delPendingEvent(this);
+    if (expect_false(!isActive())) {
         return;
     }
-    loop_->delTimer( this );
+    loop_->delTimer(this);
     ev_stop();
 }
 
 void EventSignal::start()
 {
-    if( isActive() ){
+    if (isActive()) {
         return;
     }
 
-    tiny_assert( sigNum_ > 0 );
+    tiny_assert(sigNum_ > 0);
     ev_start(1);
 
-    loop_->addSignalEvent( this );
+    loop_->addSignalEvent(this);
 
     struct sigaction sa;
 
     sa.sa_handler = Tiny::sigHandle;
-    sigfillset( &sa.sa_mask );
+    sigfillset(&sa.sa_mask);
 
     sa.sa_flags = SA_RESTART;
 
-    sigaction( sigNum_, &sa, 0 );
+    sigaction(sigNum_, &sa, 0);
 
 }
 
 void EventSignal::stop()
 {
     loop_->delPendingEvent( (IEvent*)this );
-    if( expect_false( !isActive() ) ){
+    if (expect_false(!isActive())) {
         return;
     }
 
-    loop_->delSignalEvent( this );
+    loop_->delSignalEvent(this);
 
     ev_stop();
 
-    signal( sigNum_, SIG_DFL );
+    signal(sigNum_, SIG_DFL);
 }
 
 

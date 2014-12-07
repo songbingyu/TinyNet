@@ -32,10 +32,7 @@ protected:
 
 };
 
-
-
-
-#endif
+#endif //_IPOLLER_H_
 
 
 
